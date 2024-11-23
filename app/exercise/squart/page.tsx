@@ -26,6 +26,8 @@ export default function Home() {
     const [videoReady, setVideoReady] = useState(false);
     const [isBeginnerMode, setIsBeginnerMode] = useState(true);
     const thresholds = getThresholds(isBeginnerMode);
+    const [leftKneeAngle, setLeftKneeAngle] = useState(0);
+    const [rightKneeAngle, setRightKneeAngle] = useState(0);
 
     const [squatCount, setSquatCount] = useState(0);
     const [frameCount, setFrameCount] = useState(0);
@@ -152,7 +154,11 @@ export default function Home() {
         const rightKnee = keypoints.find((kp: any) => kp.name === "right_knee" && kp.score > threshold);
         const rightAnkle = keypoints.find((kp: any) => kp.name === "right_ankle" && kp.score > threshold);
 
-        console.log("Keypoints:", leftHip, leftKnee, leftAnkle, rightHip, rightKnee, rightAnkle);
+        // console.log("Keypoints:", leftHip, leftKnee, leftAnkle, rightHip, rightKnee, rightAnkle);
+        const leftKneeAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+        setLeftKneeAngle(leftKneeAngle);
+        const rightKneeAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+        setRightKneeAngle(rightKneeAngle);
 
         if (
             leftHip?.score > 0.7 &&
@@ -184,6 +190,12 @@ export default function Home() {
                 ctx.strokeStyle = "aqua";
                 ctx.lineWidth = 2;
                 ctx.stroke();
+                // Draw angles as text near the knee points
+                // ctx.font = "14px Arial";
+                // ctx.fillStyle = "yellow";
+                // ctx.fillText(`Left Knee: ${Math.round(leftKneeAngle)}°`, leftKnee.x + 5, leftKnee.y - 5);
+                // ctx.fillText(`Right Knee: ${Math.round(rightKneeAngle)}°`, rightKnee.x + 5, rightKnee.y - 5);
+
 
                 // Draw dots at each keypoint
                 const drawDot = (x: number, y: number) => {
@@ -278,10 +290,12 @@ export default function Home() {
             />
 
             <div
-                className="absolute top-2 left-2 p-4 border-2 border-black bg-white"
+                className="absolute top-2 left-2 p-4 border-2 border-black gap-x-6 bg-white"
 
             >
                 <p>Squart Count: {squatCount}</p>
+                <p>Left Knee Angle: {Math.round(leftKneeAngle)}°</p>
+                <p>Right Knee Angle: {Math.round(rightKneeAngle)}°</p>
             </div>
 
 
