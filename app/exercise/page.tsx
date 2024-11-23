@@ -40,11 +40,12 @@ const ExercisePage = () => {
                     {Features.map((lang: Exercise, index: number) => (
                         <Link
                             href={lang.href}
+                            key={index}
                         >
                             <div
                                 className={`border-[1px] rounded-md p-2 text-start gap-2 flex flex-col  ${index % 2 === 0 ? "mr-0" : "ml-0"
                                     }`}
-                                key={index}
+
                             >
                                 <div className="flex gap-2 items-center">
                                     <div>
