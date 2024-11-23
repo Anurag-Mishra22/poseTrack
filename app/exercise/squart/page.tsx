@@ -290,12 +290,33 @@ export default function Home() {
             />
 
             <div
-                className="absolute top-2 left-2 p-4 border-2 border-black gap-x-6 bg-white"
+                className="absolute top-2 left-2 gap-x-6 "
 
             >
-                <p>Squart Count: {squatCount}</p>
-                <p>Left Knee Angle: {Math.round(leftKneeAngle)}°</p>
-                <p>Right Knee Angle: {Math.round(rightKneeAngle)}°</p>
+                <div className="flex gap-x-6">
+                    <div className="bg-white border-black border-2 p-4">
+                        <p>Squart Count: {squatCount}</p>
+
+                    </div>
+                    <div className="bg-white border-black border-2 p-4">
+                        <p>Left Knee Angle: {Math.round(leftKneeAngle)}°</p>
+
+                    </div>
+                    <div className="bg-white border-black border-2 p-4">
+                        <p>Right Knee Angle: {Math.round(rightKneeAngle)}°</p>
+                    </div>
+
+                </div>
+                <div className="bg-white border-black border-2 p-4 w-32 mt-2 flex items-center justify-center">
+                    {
+                        rightKneeAngle < 110 && leftKneeAngle < 110 && rightKneeAngle > 80 && leftKneeAngle > 80 && <p className="bg-green-400 p-2 rounded-md">Good Squart</p>
+                    }
+                    {
+                        (rightKneeAngle > 110 || leftKneeAngle > 110) && <p className="bg-gray-200 p-2 rounded-md">Relax</p>
+                    }
+
+                </div>
+
             </div>
 
 
