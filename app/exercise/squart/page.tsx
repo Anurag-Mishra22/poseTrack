@@ -25,14 +25,14 @@ export default function Home() {
     const [detector, setDetector] = useState<any>(null);
     const [videoReady, setVideoReady] = useState(false);
     const [isBeginnerMode, setIsBeginnerMode] = useState(true);
-    const thresholds = getThresholds(isBeginnerMode);
+
     const [leftKneeAngle, setLeftKneeAngle] = useState(0);
     const [rightKneeAngle, setRightKneeAngle] = useState(0);
 
     const [squatCount, setSquatCount] = useState(0);
-    const [frameCount, setFrameCount] = useState(0);
-    const setStageS = useSquat((state: any) => state.setStageS);
-    const stageS = useSquat((state: any) => state.stageS);
+
+    const [wait, setWait] = useState(1);
+
 
     // Initialize PoseNet model
     useEffect(() => {
@@ -168,7 +168,7 @@ export default function Home() {
             rightKnee?.score > 0.7 &&
             rightAnkle?.score > 0.7
         ) {
-
+            setWait(0);
             // Ensure all keypoints are valid before drawing
             if (
                 leftHip && leftKnee && leftAnkle &&
@@ -190,11 +190,7 @@ export default function Home() {
                 ctx.strokeStyle = "aqua";
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                // Draw angles as text near the knee points
-                // ctx.font = "14px Arial";
-                // ctx.fillStyle = "yellow";
-                // ctx.fillText(`Left Knee: ${Math.round(leftKneeAngle)}°`, leftKnee.x + 5, leftKnee.y - 5);
-                // ctx.fillText(`Right Knee: ${Math.round(rightKneeAngle)}°`, rightKnee.x + 5, rightKnee.y - 5);
+
 
 
                 // Draw dots at each keypoint
@@ -257,9 +253,9 @@ export default function Home() {
                 overflow: "hidden", // Hide any overflow
             }}
         >
-            <button onClick={() => setIsBeginnerMode(!isBeginnerMode)}>
+            {/* <button onClick={() => setIsBeginnerMode(!isBeginnerMode)}>
                 Toggle Mode ({isBeginnerMode ? "Beginner" : "Pro"})
-            </button>
+            </button> */}
             <video
                 ref={videoRef}
                 style={{
@@ -293,33 +289,48 @@ export default function Home() {
                 className="absolute top-2 left-2 gap-x-6 "
 
             >
-                <div className="flex gap-x-6">
-                    <div className="bg-white border-black border-2 p-4">
-                        <p>Squart Count: {squatCount}</p>
+                {
+                    wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Please wait...</div> : <>
 
-                    </div>
-                    <div className="bg-white border-black border-2 p-4">
-                        <p>Left Knee Angle: {Math.round(leftKneeAngle)}°</p>
+                        <div className="flex gap-x-6">
+                            <div className="bg-white border-black border-2 p-4">
+                                <p>Squart Count: {squatCount}</p>
 
-                    </div>
-                    <div className="bg-white border-black border-2 p-4">
-                        <p>Right Knee Angle: {Math.round(rightKneeAngle)}°</p>
-                    </div>
+                            </div>
+                            <div className="bg-white border-black border-2 p-4">
+                                <p>Left Knee Angle: {Math.round(leftKneeAngle)}°</p>
 
-                </div>
-                <div className="bg-white border-black border-2 p-4 w-40 mt-2 flex items-center justify-center">
-                    {
-                        rightKneeAngle < 110 && leftKneeAngle < 110 && rightKneeAngle > 80 && leftKneeAngle > 80 && <p className="bg-green-400 p-2 rounded-md"> Good Squart</p>
-                    }
-                    {
-                        (rightKneeAngle > 110 || leftKneeAngle > 110) && <p className="bg-gray-200 p-2 rounded-md">Relax</p>
-                    }
-                    {
-                        (rightKneeAngle < 80 || leftKneeAngle < 80) && <p className="bg-red-400 p-2 rounded-md">Squart too deep</p>
-                    }
+                            </div>
+                            <div className="bg-white border-black border-2 p-4">
+                                <p>Right Knee Angle: {Math.round(rightKneeAngle)}°</p>
+                            </div>
 
-                </div>
+                        </div>
 
+
+                        {
+                            rightKneeAngle < 110 && leftKneeAngle < 110 && rightKneeAngle > 80 && leftKneeAngle > 80 &&
+                            <div className="bg-green-400 border-black border-2 p-4 w-40 mt-2 flex items-center justify-center">
+                                <p className="text-black p-2 rounded-md"> Good Squart</p>
+                            </div>
+
+                        }
+                        {
+                            (rightKneeAngle > 110 || leftKneeAngle > 110) &&
+                            <div className="bg-white border-black border-2 p-4 w-32 mt-2 flex items-center justify-center">
+                                <p className="text-black p-2 rounded-md">Relax</p>
+                            </div>
+                        }
+                        {
+                            (rightKneeAngle < 80 || leftKneeAngle < 80) &&
+                            <div className="bg-red-600 border-black border-2 p-4 w-44 mt-2 flex items-center justify-center">
+                                <p className="text-white ">Squart too deep</p>
+                            </div>
+                        }
+
+
+                    </>
+                }
             </div>
 
 

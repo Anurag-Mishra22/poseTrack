@@ -273,13 +273,7 @@ export default function Home() {
                 >Bicep Curl Count: {curlCount}</p>
             </div>
             <div
-
-                style={{
-                    position: "absolute",
-                    bottom: "10px",
-                    left: "10px",
-                    color: "white",
-                }}
+                className="absolute top-2 left-64 p-4 border-2 border-black bg-white"
             >
                 {stageL}
             </div>
