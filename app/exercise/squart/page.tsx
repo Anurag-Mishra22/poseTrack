@@ -240,8 +240,8 @@ export default function Home() {
             className="webcam-container"
             style={{
                 position: "relative",
-                width: "100vw", // Full width
-                height: "100vh", // Full height
+                width: "640px", // Full width
+                height: "480px", // Full height
                 overflow: "hidden", // Hide any overflow
             }}
         >
@@ -254,8 +254,8 @@ export default function Home() {
                     position: "absolute",
                     top: 0,
                     left: 0,
-                    width: "100%", // Fill the entire container
-                    height: "100%", // Maintain aspect ratio by stretching
+                    width: "640px", // Fill the entire container
+                    height: "480px", // Maintain aspect ratio by stretching
                     objectFit: "cover", // Adjust video scaling
                 }}
                 autoPlay
