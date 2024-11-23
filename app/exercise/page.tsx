@@ -2,7 +2,11 @@ import { SquareCheck } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react'
 
-
+type Exercise = {
+    heading: string;
+    description: string;
+    href: string;
+};
 
 const ExercisePage = () => {
     const Features = [
@@ -33,7 +37,7 @@ const ExercisePage = () => {
                     Features
                 </div>
                 <div className="grid gap-2 grid-cols-1 md:grid-cols-2 p-2 ">
-                    {Features.map((lang: any, index: number) => (
+                    {Features.map((lang: Exercise, index: number) => (
                         <Link
                             href={lang.href}
                         >
