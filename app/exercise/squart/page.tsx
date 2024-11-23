@@ -108,12 +108,12 @@ export default function Home() {
         const rightAnkle = keypoints.find((kp: any) => kp.name === "right_ankle");
 
         if (
-            leftHip?.score > 0.9 &&
-            leftKnee?.score > 0.9 &&
-            leftAnkle?.score > 0.9 &&
-            rightHip?.score > 0.9 &&
-            rightKnee?.score > 0.9 &&
-            rightAnkle?.score > 0.9
+            leftHip?.score > 0.5 &&
+            leftKnee?.score > 0.5 &&
+            leftAnkle?.score > 0.5 &&
+            rightHip?.score > 0.5 &&
+            rightKnee?.score > 0.5 &&
+            rightAnkle?.score > 0.5
         ) {
 
             if (leftHip && leftKnee && leftAnkle && rightHip && rightKnee && rightAnkle) {
@@ -155,12 +155,12 @@ export default function Home() {
         console.log("Keypoints:", leftHip, leftKnee, leftAnkle, rightHip, rightKnee, rightAnkle);
 
         if (
-            leftHip?.score > 0.9 &&
-            leftKnee?.score > 0.9 &&
-            leftAnkle?.score > 0.9 &&
-            rightHip?.score > 0.9 &&
-            rightKnee?.score > 0.9 &&
-            rightAnkle?.score > 0.9
+            leftHip?.score > 0.5 &&
+            leftKnee?.score > 0.5 &&
+            leftAnkle?.score > 0.5 &&
+            rightHip?.score > 0.5 &&
+            rightKnee?.score > 0.5 &&
+            rightAnkle?.score > 0.5
         ) {
 
             // Ensure all keypoints are valid before drawing
