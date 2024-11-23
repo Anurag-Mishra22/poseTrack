@@ -309,7 +309,7 @@ export default function Home() {
                 </div>
                 <div className="bg-white border-black border-2 p-4 w-32 mt-2 flex items-center justify-center">
                     {
-                        rightKneeAngle < 110 && leftKneeAngle < 110 && rightKneeAngle > 80 && leftKneeAngle > 80 && <p className="bg-green-400 p-2 rounded-md">Good Squart</p>
+                        rightKneeAngle < 110 && leftKneeAngle < 110 && rightKneeAngle > 80 && leftKneeAngle > 80 && <p className="bg-green-400 p-2 rounded-md">Squart to Deep</p>
                     }
                     {
                         (rightKneeAngle > 110 || leftKneeAngle > 110) && <p className="bg-gray-200 p-2 rounded-md">Relax</p>
