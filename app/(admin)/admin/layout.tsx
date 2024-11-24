@@ -18,9 +18,9 @@ export default async function AdminDashBoardLayout({ children }: { children: Rea
     // const { getUser } = getKindeServerSession();
     // const user = await getUser();
 
-    if (!user || user.emailAddresses[0].emailAddress !== process.env.ADMIN_EMAIL) {
-        return redirect("/");
-    }
+    // if (!user || user.emailAddresses[0].emailAddress !== process.env.ADMIN_EMAIL) {
+    //     return redirect("/");
+    // }
 
     return (
         <div className="flex w-full flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
