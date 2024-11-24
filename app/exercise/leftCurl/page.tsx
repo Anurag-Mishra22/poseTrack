@@ -34,6 +34,7 @@ export default function Home() {
 
     const setStageL = useLeftCurl((state: any) => state.setStageL)
     const stageL = useLeftCurl((state: any) => state.stageL)
+    const [wait, setWait] = useState(1);
 
 
     // Initialize PoseNet model
@@ -168,7 +169,7 @@ export default function Home() {
             leftElbow?.score > 0.8 &&
             leftWrist?.score > 0.8
         ) {
-
+            setWait(0);
             // Draw keypoints
             keypoints.forEach((point: any) => {
                 if (
@@ -283,19 +284,24 @@ export default function Home() {
                         pointerEvents: "none",
                     }}
                 />
-                <div
-                    className="absolute top-2 left-2 p-4 border-2 border-black bg-white"
+                {
+                    wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Please wait...</div> : <>
+                        <div
+                            className="absolute top-2 left-2 p-4 border-2 border-black bg-white"
 
-                >
-                    <p
+                        >
+                            <p
 
-                    >Bicep Curl Count: {curlCount}</p>
-                </div>
-                <div
-                    className="absolute top-2 left-64 p-4 border-2 border-black bg-white"
-                >
-                    {stageL}
-                </div>
+                            >Bicep Curl Count: {curlCount}</p>
+                        </div>
+                        <div
+                            className="absolute top-2 left-64 p-4 border-2 border-black bg-white"
+                        >
+                            {stageL}
+                        </div>
+                    </>
+                }
+
             </div>
 
             {/* Video................... */}
