@@ -169,7 +169,7 @@ export default function Home() {
             leftElbow?.score > 0.8 &&
             leftWrist?.score > 0.8
         ) {
-            setWait(0);
+
             // Draw keypoints
             keypoints.forEach((point: any) => {
                 if (
@@ -188,7 +188,7 @@ export default function Home() {
 
             ctx.strokeStyle = "aqua";
             ctx.lineWidth = 2;
-
+            setWait(0);
             // Define connections for left side (shoulder -> elbow, elbow -> wrist)
             const connections = [
                 ["left_shoulder", "left_elbow"],
