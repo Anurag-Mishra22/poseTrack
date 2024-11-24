@@ -6,15 +6,15 @@ import { currentUser } from "@clerk/nextjs/server";
 export async function POST(req: Request) {
   try {
     const currentUserDetails = await currentUser();
-    if (
-      currentUserDetails?.emailAddresses[0].emailAddress !==
-      process.env.ADMIN_EMAIL
-    ) {
-      return NextResponse.json(
-        { error: "You are not authorized to create a user" },
-        { status: 401 }
-      );
-    }
+    // if (
+    //   currentUserDetails?.emailAddresses[0].emailAddress !==
+    //   process.env.ADMIN_EMAIL
+    // ) {
+    //   return NextResponse.json(
+    //     { error: "You are not authorized to create a user" },
+    //     { status: 401 }
+    //   );
+    // }
     const client = await clerkClient();
     const { email } = await req.json();
     console.log(email);
