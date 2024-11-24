@@ -169,7 +169,7 @@ export default function Home() {
             leftElbow?.score > 0.8 &&
             leftWrist?.score > 0.8
         ) {
-
+            setWait(0);
             // Draw keypoints
             keypoints.forEach((point: any) => {
                 if (
@@ -213,10 +213,11 @@ export default function Home() {
                     ctx.moveTo(start.x, start.y);
                     ctx.lineTo(end.x, end.y);
                     ctx.stroke();
-                    setWait(0);
+
                 }
             });
         }
+
     };
     // Pose detection logic
     const detectPose = async () => {
@@ -286,7 +287,7 @@ export default function Home() {
                     }}
                 />
                 {
-                    wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Please wait...</div> : <>
+                    wait === 1 ? <div className="text-2xl absolute top-2 left-2 text-black border-2 bg-white border-black p-2">Please wait...</div> : <>
                         <div
                             className="absolute top-2 left-2 p-4 border-2 border-black bg-white"
 
