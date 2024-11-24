@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 
 async function deleteUser(userId: string) {
     try {
-        const response = await fetch('http://localhost:3000/api/user', {
+        const response = await fetch('https://pose-track.vercel.app/api/user', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
