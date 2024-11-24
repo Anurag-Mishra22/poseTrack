@@ -28,6 +28,8 @@ export default function Home() {
 
     const [leftKneeAngle, setLeftKneeAngle] = useState(0);
     const [rightKneeAngle, setRightKneeAngle] = useState(0);
+    const [backAngle, setBackAngle] = useState(0);
+    const [backPosture, setBackPosture] = useState(false);
 
     const [squatCount, setSquatCount] = useState(0);
 
@@ -101,6 +103,41 @@ export default function Home() {
         return angle > 180 ? 360 - angle : angle;
     };
 
+    // Function to calculate back posture angle
+    const validateBackPosture = (keypoints: any) => {
+        const leftShoulder = keypoints.find((kp: any) => kp.name === "left_shoulder");
+        const rightShoulder = keypoints.find((kp: any) => kp.name === "right_shoulder");
+        const leftHip = keypoints.find((kp: any) => kp.name === "left_hip");
+        const rightHip = keypoints.find((kp: any) => kp.name === "right_hip");
+
+        if (
+            leftShoulder?.score > 0.7 &&
+            rightShoulder?.score > 0.7 &&
+            leftHip?.score > 0.7 &&
+            rightHip?.score > 0.7
+        ) {
+            // Average positions for midpoints
+            const shoulderMid = {
+                x: (leftShoulder.x + rightShoulder.x) / 2,
+                y: (leftShoulder.y + rightShoulder.y) / 2,
+            };
+            const hipMid = {
+                x: (leftHip.x + rightHip.x) / 2,
+                y: (leftHip.y + rightHip.y) / 2,
+            };
+            const verticalLine = { x: hipMid.x, y: 0 }; // Vertical reference
+
+            // Calculate back angle
+            const backAngle = calculateAngle(shoulderMid, hipMid, verticalLine);
+            const isGoodPosture = true // Adjustable threshold
+            // Check if back angle is within the good posture range
+            // const isGoodPosture = backAngle >= 10 && backAngle <= 18; // Adjustable threshold
+            return { backAngle, isGoodPosture };  // bend forward  45 bend backward 
+        }
+
+        return { backAngle: null, isGoodPosture: false };
+    };
+
     const detectSquat = (keypoints: any) => {
         const leftHip = keypoints.find((kp: any) => kp.name === "left_hip");
         const leftKnee = keypoints.find((kp: any) => kp.name === "left_knee");
@@ -121,6 +158,10 @@ export default function Home() {
             if (leftHip && leftKnee && leftAnkle && rightHip && rightKnee && rightAnkle) {
                 const leftKneeAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
                 const rightKneeAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+                // Validate back posture
+                const { backAngle, isGoodPosture } = validateBackPosture(keypoints);
+                setBackAngle(backAngle || 0);
+                setBackPosture(isGoodPosture);
 
 
                 if (leftKneeAngle < 110 && rightKneeAngle < 110 && (useSquat.getState() as any).stageS === "down") {
@@ -154,6 +195,10 @@ export default function Home() {
         const rightKnee = keypoints.find((kp: any) => kp.name === "right_knee" && kp.score > threshold);
         const rightAnkle = keypoints.find((kp: any) => kp.name === "right_ankle" && kp.score > threshold);
 
+        // Find keypoints for back posture
+        const leftShoulder = keypoints.find((kp: any) => kp.name === "left_shoulder" && kp.score > threshold);
+        const rightShoulder = keypoints.find((kp: any) => kp.name === "right_shoulder" && kp.score > threshold);
+
         // console.log("Keypoints:", leftHip, leftKnee, leftAnkle, rightHip, rightKnee, rightAnkle);
         const leftKneeAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
         setLeftKneeAngle(leftKneeAngle);
@@ -166,13 +211,17 @@ export default function Home() {
             leftAnkle?.score > 0.7 &&
             rightHip?.score > 0.7 &&
             rightKnee?.score > 0.7 &&
-            rightAnkle?.score > 0.7
+            rightAnkle?.score > 0.7 &&
+            leftShoulder?.score > 0.7 &&
+            rightShoulder?.score > 0.7
+
         ) {
             setWait(0);
             // Ensure all keypoints are valid before drawing
             if (
                 leftHip && leftKnee && leftAnkle &&
-                rightHip && rightKnee && rightAnkle
+                rightHip && rightKnee && rightAnkle &&
+                leftShoulder && rightShoulder
             ) {
                 ctx.beginPath();
 
@@ -186,6 +235,13 @@ export default function Home() {
                 ctx.lineTo(rightKnee.x, rightKnee.y);
                 ctx.lineTo(rightAnkle.x, rightAnkle.y);
 
+                // Draw back posture (shoulders to hips)
+                ctx.moveTo(leftShoulder.x, leftShoulder.y);
+                ctx.lineTo(leftHip.x, leftHip.y);
+
+                ctx.moveTo(rightShoulder.x, rightShoulder.y);
+                ctx.lineTo(rightHip.x, rightHip.y);
+
                 // Set styling for the lines
                 ctx.strokeStyle = "aqua";
                 ctx.lineWidth = 2;
@@ -196,7 +252,7 @@ export default function Home() {
                 // Draw dots at each keypoint
                 const drawDot = (x: number, y: number) => {
                     ctx.beginPath();
-                    ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                    ctx.arc(x, y, 4, 0, 2 * Math.PI);
                     ctx.fillStyle = "red";
                     ctx.fill();
                 };
@@ -207,6 +263,10 @@ export default function Home() {
                 drawDot(rightHip.x, rightHip.y);
                 drawDot(rightKnee.x, rightKnee.y);
                 drawDot(rightAnkle.x, rightAnkle.y);
+
+                // Draw dots for back posture
+                drawDot(leftShoulder.x, leftShoulder.y);
+                drawDot(rightShoulder.x, rightShoulder.y);
             } else {
                 console.warn("Some keypoints are missing or below the threshold score.");
             }
@@ -244,95 +304,125 @@ export default function Home() {
     };
 
     return (
-        <div
-            className="webcam-container"
-            style={{
-                position: "relative",
-                width: "640px", // Full width
-                height: "480px", // Full height
-                overflow: "hidden", // Hide any overflow
-            }}
-        >
-            {/* <button onClick={() => setIsBeginnerMode(!isBeginnerMode)}>
+        <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4">
+            <div
+                className="webcam-container"
+                style={{
+                    position: "relative",
+                    width: "640px", // Full width
+                    height: "480px", // Full height
+                    overflow: "hidden", // Hide any overflow
+                }}
+            >
+                {/* <button onClick={() => setIsBeginnerMode(!isBeginnerMode)}>
                 Toggle Mode ({isBeginnerMode ? "Beginner" : "Pro"})
             </button> */}
-            <video
-                ref={videoRef}
-                style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "640px", // Fill the entire container
-                    height: "480px", // Maintain aspect ratio by stretching
-                    objectFit: "cover", // Adjust video scaling
-                }}
-                autoPlay
-                muted
-                playsInline
-            />
+                <video
+                    ref={videoRef}
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "640px", // Fill the entire container
+                        height: "480px", // Maintain aspect ratio by stretching
+                        objectFit: "cover", // Adjust video scaling
+                    }}
+                    autoPlay
+                    muted
+                    playsInline
+                />
 
-            <canvas
-                ref={canvasRef}
-                width={640}
-                height={480}
-                style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    pointerEvents: "none",
-                }}
-            />
+                <canvas
+                    ref={canvasRef}
+                    width={640}
+                    height={480}
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        pointerEvents: "none",
+                    }}
+                />
 
-            <div
-                className="absolute top-2 left-2 gap-x-6 "
+                <div
+                    className="absolute top-2 left-2 gap-x-6 "
 
-            >
-                {
-                    wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Please wait...</div> : <>
+                >
+                    {
+                        wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Please wait...</div> : <>
 
-                        <div className="flex gap-x-6">
-                            <div className="bg-white border-black border-2 p-4">
-                                <p>Squart Count: {squatCount}</p>
+                            <div className="flex flex-col gap-y-2 text-sm">
+                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                                    <p>Count: {squatCount}</p>
+
+                                </div>
+                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                                    <p>Left Knee Angle: {Math.round(leftKneeAngle)}°</p>
+
+                                </div>
+                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                                    <p>Right Knee Angle: {Math.round(rightKneeAngle)}°</p>
+                                </div>
+                                {/* // const isGoodPosture = backAngle >= 10 && backAngle <= 18; // Adjustable threshold
+            return { backAngle, isGoodPosture };  // bend forward  45 bend backward  */}
+
+                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                                    <p>Back Angle: {Math.round(backAngle)}°</p>
+                                </div>
+                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                                    <p>{
+                                        backAngle >= 10 && backAngle <= 18 ? "Bend Backword" : backAngle > 18 && backAngle < 45 ? "Good Posture" : "Bend Forward"
+
+
+                                    }</p>
+                                </div>
 
                             </div>
-                            <div className="bg-white border-black border-2 p-4">
-                                <p>Left Knee Angle: {Math.round(leftKneeAngle)}°</p>
-
-                            </div>
-                            <div className="bg-white border-black border-2 p-4">
-                                <p>Right Knee Angle: {Math.round(rightKneeAngle)}°</p>
-                            </div>
-
-                        </div>
 
 
-                        {
-                            rightKneeAngle < 110 && leftKneeAngle < 110 && rightKneeAngle > 80 && leftKneeAngle > 80 &&
-                            <div className="bg-green-400 border-black border-2 p-4 w-40 mt-2 flex items-center justify-center">
-                                <p className="text-black p-2 rounded-md"> Good Squart</p>
-                            </div>
+                            {
+                                rightKneeAngle < 110 && leftKneeAngle < 110 && rightKneeAngle > 80 && leftKneeAngle > 80 &&
+                                <div className="bg-green-400 rounded-[12px] border-black border-2 p-2 w-40 mt-2 flex items-center justify-center">
+                                    <p className="text-black p-2 rounded-md"> Good Squart</p>
+                                </div>
 
-                        }
-                        {
-                            (rightKneeAngle > 110 || leftKneeAngle > 110) &&
-                            <div className="bg-white border-black border-2 p-4 w-32 mt-2 flex items-center justify-center">
-                                <p className="text-black p-2 rounded-md">Relax</p>
-                            </div>
-                        }
-                        {
-                            (rightKneeAngle < 80 || leftKneeAngle < 80) &&
-                            <div className="bg-red-600 border-black border-2 p-4 w-44 mt-2 flex items-center justify-center">
-                                <p className="text-white ">Squart too deep</p>
-                            </div>
-                        }
+                            }
+                            {
+                                (rightKneeAngle > 110 || leftKneeAngle > 110) &&
+                                <div className="bg-white rounded-[12px] border-black border-2 p-2 w-32 mt-2 flex items-center justify-center">
+                                    <p className="text-black p-2 rounded-md">Relax</p>
+                                </div>
+                            }
+                            {
+                                (rightKneeAngle < 80 || leftKneeAngle < 80) &&
+                                <div className="bg-red-600 rounded-[12px] border-black border-2 p-2 w-44 mt-2 flex items-center justify-center">
+                                    <p className="text-white ">Squart too deep</p>
+                                </div>
+                            }
 
 
-                    </>
-                }
+                        </>
+                    }
+                </div>
+
+
             </div>
 
+
+
+            {/* Video................... */}
+
+            <div className="flex flex-col gap-y-4">
+                <div className="text-5xl font-bold">
+                    <span className="text-[#f08b02]">Reference Video</span>
+                </div>
+                <video controls width="500" height="360">
+                    <source src="/squat.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+            </div>
 
         </div>
     );
