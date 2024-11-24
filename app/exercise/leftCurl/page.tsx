@@ -188,7 +188,7 @@ export default function Home() {
 
             ctx.strokeStyle = "aqua";
             ctx.lineWidth = 2;
-            setWait(0);
+
             // Define connections for left side (shoulder -> elbow, elbow -> wrist)
             const connections = [
                 ["left_shoulder", "left_elbow"],
@@ -213,6 +213,7 @@ export default function Home() {
                     ctx.moveTo(start.x, start.y);
                     ctx.lineTo(end.x, end.y);
                     ctx.stroke();
+                    setWait(0);
                 }
             });
         }
