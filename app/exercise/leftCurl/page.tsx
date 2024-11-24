@@ -5,8 +5,25 @@ import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs";
 import * as poseDetection from "@tensorflow-models/pose-detection";
 import { useLeftCurl } from "@/store/useLeftCurl";
+import { SquareCheck } from "lucide-react";
+
+type Exercise = {
+    heading: string;
+    description: string;
+
+};
 
 export default function Home() {
+    const Features = [
+        {
+            heading: "Instructions",
+            description:
+                "Hold a dumbbell in your left hand with your palm facing forward. Keep your elbow close to your side and curl the weight up to shoulder height, squeezing your left bicep. Lower it slowly back down and repeat. Keep your movements controlled and avoid swinging",
+        },
+
+
+
+    ];
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [detector, setDetector] = useState<any>(null);
@@ -227,55 +244,91 @@ export default function Home() {
 
 
     return (
-        <div
-            className="webcam-container"
-            style={{
-                position: "relative",
-                width: "640px", // Full width
-                height: "480px", // Full height
-                overflow: "hidden", // Hide any overflow
-            }}
-        >
-            <video
-                ref={videoRef}
-                style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "640px", // Fill the entire container
-                    height: "480px", // Maintain aspect ratio by stretching
-                    objectFit: "cover", // Adjust video scaling
-                }}
-                autoPlay
-                muted
-                playsInline
-            />
+        <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4">
 
-            <canvas
-                ref={canvasRef}
-                width={640}
-                height={480}
-                style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    pointerEvents: "none",
-                }}
-            />
             <div
-                className="absolute top-2 left-2 p-4 border-2 border-black bg-white"
-
+                className="webcam-container"
+                style={{
+                    position: "relative",
+                    width: "640px", // Full width
+                    height: "480px", // Full height
+                    overflow: "hidden", // Hide any overflow
+                }}
             >
-                <p
+                <video
+                    ref={videoRef}
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "640px", // Fill the entire container
+                        height: "480px", // Maintain aspect ratio by stretching
+                        objectFit: "cover", // Adjust video scaling
+                    }}
+                    autoPlay
+                    muted
+                    playsInline
+                />
 
-                >Bicep Curl Count: {curlCount}</p>
+                <canvas
+                    ref={canvasRef}
+                    width={640}
+                    height={480}
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        pointerEvents: "none",
+                    }}
+                />
+                <div
+                    className="absolute top-2 left-2 p-4 border-2 border-black bg-white"
+
+                >
+                    <p
+
+                    >Bicep Curl Count: {curlCount}</p>
+                </div>
+                <div
+                    className="absolute top-2 left-64 p-4 border-2 border-black bg-white"
+                >
+                    {stageL}
+                </div>
             </div>
-            <div
-                className="absolute top-2 left-64 p-4 border-2 border-black bg-white"
-            >
-                {stageL}
+
+            {/* Video................... */}
+
+            <div className="flex flex-col gap-y-4 w-[500px]">
+                <div className="text-5xl font-bold">
+                    <span className="text-[#f08b02]">Reference Video</span>
+                </div>
+                <video controls width="500" height="360">
+                    <source src="/leftbicepcurl.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+                <div className="grid gap-4 grid-cols-1  p-2 mb-4">
+                    {Features.map((lang: Exercise, index: number) => (
+
+                        <div
+                            className={`border-[1px] rounded-md p-2 text-start gap-2 flex flex-col  ${index % 2 === 0 ? "mr-0" : "ml-0"
+                                }`}
+                            key={index}
+
+                        >
+                            <div className="flex gap-2 items-center">
+                                <div>
+                                    <SquareCheck className="w-5 h-5 text-[#f08b02]" />
+                                </div>
+                                <div className="font-bold">{lang.heading}</div>
+                            </div>
+
+                            <div className="text-gray-500">{lang.description}</div>
+                        </div>
+
+                    ))}
+                </div>
             </div>
         </div>
     );

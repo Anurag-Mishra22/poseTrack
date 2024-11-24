@@ -1,4 +1,5 @@
 import { SquareCheck } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react'
 
@@ -6,6 +7,7 @@ type Exercise = {
     heading: string;
     description: string;
     href: string;
+    img: string;
 };
 
 const ExercisePage = () => {
@@ -13,15 +15,45 @@ const ExercisePage = () => {
         {
             heading: "Left Bicep Curl",
             description:
-                "Count your repetitions and ensure accurate form with advanced BlazePose technology.",
+                "Follow step-by-step instructions tailored to your physiotherapy needs.",
 
             href: "/exercise/leftCurl",
+            img: "/bicepcurl.png"
         },
         {
-            heading: "Squarts",
+            heading: "Squats",
             description:
                 "Follow step-by-step instructions tailored to your physiotherapy needs.",
             href: "/exercise/squart",
+            img: "/Squat-lady-at-home.png"
+        },
+        {
+            heading: "Seated Knee Flexion & Extension",
+            description:
+                "Follow step-by-step instructions tailored to your physiotherapy needs.",
+            href: "/exercise/squart",
+            img: "/seatedKnee.png"
+        },
+        {
+            heading: "Standing Quad Stretch",
+            description:
+                "Follow step-by-step instructions tailored to your physiotherapy needs.",
+            href: "/exercise/squart",
+            img: "/standingQuadStretch.png"
+        },
+        {
+            heading: "Tree Pose",
+            description:
+                "Follow step-by-step instructions tailored to your physiotherapy needs.",
+            href: "/exercise/squart",
+            img: "/treePose.png"
+        },
+        {
+            heading: "Traingle Pose",
+            description:
+                "Follow step-by-step instructions tailored to your physiotherapy needs.",
+            href: "/exercise/squart",
+            img: "/trainglePose.png"
         },
 
 
@@ -36,7 +68,7 @@ const ExercisePage = () => {
                     Unlock the Full Potential of  Programming with These Key
                     Features
                 </div>
-                <div className="grid gap-2 grid-cols-1 md:grid-cols-2 p-2 ">
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-2 p-2 mb-4">
                     {Features.map((lang: Exercise, index: number) => (
                         <Link
                             href={lang.href}
@@ -52,6 +84,15 @@ const ExercisePage = () => {
                                         <SquareCheck className="w-5 h-5 text-[#f08b02]" />
                                     </div>
                                     <div className="font-bold">{lang.heading}</div>
+                                </div>
+                                <div className='relative h-78'>
+                                    <Image
+                                        src={lang.img}
+                                        alt='exercise'
+                                        width={300}
+                                        height={200}
+                                        className='flex object-cover w-full  '
+                                    />
                                 </div>
                                 <div className="text-gray-500">{lang.description}</div>
                             </div>

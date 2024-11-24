@@ -5,6 +5,7 @@ import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs";
 import * as poseDetection from "@tensorflow-models/pose-detection";
 import { useSquat } from "@/store/useSquart";
+import { SquareCheck } from "lucide-react";
 
 // Define threshold constants
 const getThresholds = (isBeginner: boolean) => ({
@@ -18,8 +19,23 @@ const getThresholds = (isBeginner: boolean) => ({
     INACTIVE_THRESH: 15.0,
     CNT_FRAME_THRESH: 50,
 });
+type Exercise = {
+    heading: string;
+    description: string;
+
+};
 
 export default function Home() {
+    const Features = [
+        {
+            heading: "Instructions",
+            description:
+                "Stand with feet shoulder-width apart, chest up, and back straight. Lower into a squat by bending your knees and pushing your hips back, then rise back up through your heels. Repeat.",
+        },
+
+
+
+    ];
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [detector, setDetector] = useState<any>(null);
@@ -414,7 +430,7 @@ export default function Home() {
 
             {/* Video................... */}
 
-            <div className="flex flex-col gap-y-4">
+            <div className="flex flex-col gap-y-4 w-[500px]">
                 <div className="text-5xl font-bold">
                     <span className="text-[#f08b02]">Reference Video</span>
                 </div>
@@ -422,7 +438,30 @@ export default function Home() {
                     <source src="/squat.mp4" type="video/mp4" />
                     Your browser does not support the video tag.
                 </video>
+
+                <div className="grid gap-4 grid-cols-1  p-2 mb-4">
+                    {Features.map((lang: Exercise, index: number) => (
+
+                        <div
+                            className={`border-[1px] rounded-md p-2 text-start gap-2 flex flex-col  ${index % 2 === 0 ? "mr-0" : "ml-0"
+                                }`}
+                            key={index}
+
+                        >
+                            <div className="flex gap-2 items-center">
+                                <div>
+                                    <SquareCheck className="w-5 h-5 text-[#f08b02]" />
+                                </div>
+                                <div className="font-bold">{lang.heading}</div>
+                            </div>
+
+                            <div className="text-gray-500">{lang.description}</div>
+                        </div>
+
+                    ))}
+                </div>
             </div>
+
 
         </div>
     );
