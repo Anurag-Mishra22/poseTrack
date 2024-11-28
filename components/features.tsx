@@ -42,7 +42,7 @@ export function Features() {
         >
             <div className="flex flex-col items-center m-auto text-center gap-4 max-w-[1024px]">
                 <div className="text-5xl font-bold">
-                    Platform <span className="text-[#f08b02]">Features</span>
+                    Platform <span className="text-[#02a8c0]">Features</span>
                 </div>
                 <div className="text-sm text-gray-500 w-full md:w-2/3">
                     Unlock the Full Potential of  Programming with These Key
@@ -57,7 +57,7 @@ export function Features() {
                         >
                             <div className="flex gap-2 items-center">
                                 <div>
-                                    <SquareCheck className="w-5 h-5 text-[#f08b02]" />
+                                    <SquareCheck className="w-5 h-5 text-[#02a8c0]" />
                                 </div>
                                 <div className="font-bold">{lang.heading}</div>
                             </div>

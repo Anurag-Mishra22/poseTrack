@@ -6,6 +6,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as poseDetection from "@tensorflow-models/pose-detection";
 import { useSquat } from "@/store/useSquart";
 import { SquareCheck } from "lucide-react";
+import Image from "next/image";
 
 // Define threshold constants
 const getThresholds = (isBeginner: boolean) => ({
@@ -320,29 +321,14 @@ export default function Home() {
     };
 
     return (
-        <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4">
+        <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
             <div
-                className="webcam-container"
-                style={{
-                    position: "relative",
-                    width: "640px", // Full width
-                    height: "480px", // Full height
-                    overflow: "hidden", // Hide any overflow
-                }}
+                className="webcam-container relative w-full  md:max-w-[640px] h-64 md:h-96 lg:h-[480px] overflow-hidden"
             >
-                {/* <button onClick={() => setIsBeginnerMode(!isBeginnerMode)}>
-                Toggle Mode ({isBeginnerMode ? "Beginner" : "Pro"})
-            </button> */}
+
                 <video
                     ref={videoRef}
-                    style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "640px", // Fill the entire container
-                        height: "480px", // Maintain aspect ratio by stretching
-                        objectFit: "cover", // Adjust video scaling
-                    }}
+                    className="absolute top-0 left-0 w-full h-full object-cover max-w-[640px] rounded-[12px]"
                     autoPlay
                     muted
                     playsInline
@@ -352,14 +338,7 @@ export default function Home() {
                     ref={canvasRef}
                     width={640}
                     height={480}
-                    style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        pointerEvents: "none",
-                    }}
+                    className="absolute top-0 left-0 w-full h-full pointer-events-none max-w-[640px]"
                 />
 
                 <div
@@ -367,33 +346,53 @@ export default function Home() {
 
                 >
                     {
-                        wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Please wait...</div> : <>
+                        wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Detecting...</div> : <>
 
                             <div className="flex flex-col gap-y-2 text-sm">
-                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
-                                    <p>Count: {squatCount}</p>
+                                <div className="flex flex-col gap-y-4">
+                                    <div className=" p-4 border-2 border-black bg-white flex items-center justify-center rounded-[12px] ">
+                                        <div className="flex flex-row items-center gap-x-2">
+                                            <Image
+                                                src="/squatgi.gif"
+                                                height={30}
+                                                width={30}
+                                                alt="squat"
+                                            />
+                                            <p className="text-xl">{squatCount}</p>
+                                        </div>
+                                    </div>
 
                                 </div>
-                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
-                                    <p>Left Knee Angle: {Math.round(leftKneeAngle)}°</p>
+
+                                <div className="bg-white rounded-[12px] flex items-center justify-center border-black border-2 p-4">
+                                    <div className="flex flex-row items-center gap-x-2">
+                                        <Image
+                                            src="/angle.png"
+                                            height={30}
+                                            width={30}
+                                            alt="angle"
+                                        />
+                                        <p className="text-xl"> {Math.round(leftKneeAngle)}°</p>
+                                    </div>
+
 
                                 </div>
-                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                                {/* <div className="bg-white rounded-[12px] border-black border-2 p-4">
                                     <p>Right Knee Angle: {Math.round(rightKneeAngle)}°</p>
-                                </div>
+                                </div> */}
                                 {/* // const isGoodPosture = backAngle >= 10 && backAngle <= 18; // Adjustable threshold
             return { backAngle, isGoodPosture };  // bend forward  45 bend backward  */}
 
-                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                                {/* <div className="bg-white rounded-[12px] border-black border-2 p-4">
                                     <p>Back Angle: {Math.round(backAngle)}°</p>
-                                </div>
-                                <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                                </div> */}
+                                {/* <div className="bg-white rounded-[12px] border-black border-2 p-4">
                                     <p>{
                                         backAngle >= 10 && backAngle <= 18 ? "Bend Backword" : backAngle > 18 && backAngle < 45 ? "Good Posture" : "Bend Forward"
 
 
                                     }</p>
-                                </div>
+                                </div> */}
 
                             </div>
 
@@ -430,34 +429,29 @@ export default function Home() {
 
             {/* Video................... */}
 
-            <div className="flex flex-col gap-y-4 w-[500px]">
-                <div className="text-5xl font-bold">
-                    <span className="text-[#f08b02]">Reference Video</span>
+            <div className="flex flex-col gap-y-4 w-full  justify-center">
+                <div className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                    <span className="text-[#02a8c0]">Reference Video</span>
                 </div>
-                <video controls width="500" height="360">
+                <video controls className="w-full h-auto rounded-[12px]">
                     <source src="/squat.mp4" type="video/mp4" />
                     Your browser does not support the video tag.
                 </video>
 
-                <div className="grid gap-4 grid-cols-1  p-2 mb-4">
+                <div className="grid gap-4 grid-cols-1 p-2 mb-4">
                     {Features.map((lang: Exercise, index: number) => (
-
                         <div
-                            className={`border-[1px] rounded-md p-2 text-start gap-2 flex flex-col  ${index % 2 === 0 ? "mr-0" : "ml-0"
-                                }`}
+                            className={`border-[1px] rounded-md p-2 text-start gap-2 flex flex-col ${index % 2 === 0 ? "mr-0" : "ml-0"}`}
                             key={index}
-
                         >
                             <div className="flex gap-2 items-center">
                                 <div>
-                                    <SquareCheck className="w-5 h-5 text-[#f08b02]" />
+                                    <SquareCheck className="w-5 h-5 text-[#02a8c0]" />
                                 </div>
                                 <div className="font-bold">{lang.heading}</div>
                             </div>
-
                             <div className="text-gray-500">{lang.description}</div>
                         </div>
-
                     ))}
                 </div>
             </div>
