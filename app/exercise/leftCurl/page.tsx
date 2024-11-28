@@ -254,7 +254,7 @@ export default function Home() {
             >
                 <video
                     ref={videoRef}
-                    className="absolute top-0 left-0 w-full h-full object-cover max-w-[640px] rounded-[12px]"
+                    className="absolute top-0 left-0 w-full h-[480px] object-cover max-w-[640px] rounded-[12px]"
                     autoPlay
                     muted
                     playsInline
@@ -264,7 +264,7 @@ export default function Home() {
                     ref={canvasRef}
                     width={640}
                     height={480}
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none max-w-[640px]"
+                    className="absolute top-0 left-0 w-full h-[480px] pointer-events-none max-w-[640px]"
                 />
                 {wait === 1 ? (
                     <div className="text-2xl absolute top-2 left-2 text-black border-2 bg-white border-black p-2">
