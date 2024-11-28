@@ -48,32 +48,7 @@ export default async function RootLayout({
           <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased flex w-full flex-col max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`}
           >
-            <header className="sticky top-0 flex h-16 items-center justify-between gap-4 border-b bg-white">
-              <nav className="hidden font-medium md:flex md:items-center md:gap-5 md:text-sm lg:gap-6">
-                <NavBar email={email} />
-              </nav>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button className="shrink-0 md:hidden" variant="outline" size="icon">
-                    <MenuIcon className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left">
-                  <nav className="flex flex-col gap-6 text-lg font-medium mt-5">
-                    <NavBar email={email} />
-                  </nav>
-                </SheetContent>
-              </Sheet>
 
-              <Image
-                src={user?.imageUrl || "/default-image.png"}
-                alt="Logo"
-                width={100}
-                height={100}
-                className="rounded-full w-10 h-10 cursor-pointer"
-
-              />
-            </header>
             {children}
           </body>
         </Providers>
