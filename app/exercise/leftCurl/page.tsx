@@ -16,7 +16,7 @@ export default function Home() {
     const Features = [
         {
             heading: "Instructions",
-            description: "Keep your left hand inside the frame",
+            description: "Keep your left hand inside the frame. Sit upright with your left arm horizontal, holding a weight. Curl the weight to your shoulder until your elbow is fully bent, then lower it back slowly.",
         },
     ];
 

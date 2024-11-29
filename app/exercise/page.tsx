@@ -62,11 +62,10 @@ const ExercisePage = () => {
         <div className='mx-auto px-4 md:px-6 flex flex-col justify-center items-center gap-0 mt-6'>
             <div className="flex flex-col items-center m-auto text-center gap-4 max-w-[1024px]">
                 <div className="text-5xl font-bold">
-                    <span className="text-[#02a8c0]">Exercise</span>
+                    <span className="text-[#02a8c0]">EXERCISE LIBRARY</span>
                 </div>
                 <div className="text-sm text-gray-500 w-full md:w-2/3">
-                    Unlock the Full Potential of  Programming with These Key
-                    Features
+                    Unlock the Full Potential of Workout with These Key Features
                 </div>
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2 p-2 mb-4">
                     {Features.map((lang: Exercise, index: number) => (
