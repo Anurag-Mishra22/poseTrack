@@ -323,12 +323,11 @@ export default function Home() {
     return (
         <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
             <div
-                className="webcam-container relative w-full  md:max-w-[640px] h-64 md:h-96 lg:h-[480px] overflow-hidden"
+                className="webcam-container relative w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px] overflow-hidden"
             >
-
                 <video
                     ref={videoRef}
-                    className="absolute top-0 left-0 w-full h-full object-cover max-w-[640px] rounded-[12px]"
+                    className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] md:max-w-[640px]"
                     autoPlay
                     muted
                     playsInline
@@ -338,7 +337,7 @@ export default function Home() {
                     ref={canvasRef}
                     width={640}
                     height={480}
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none max-w-[640px]"
+                    className="absolute top-0 left-0 w-full h-full pointer-events-none md:max-w-[640px]"
                 />
 
                 <div
