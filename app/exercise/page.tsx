@@ -27,13 +27,13 @@ const ExercisePage = () => {
             href: "/exercise/squart",
             img: "/squatgif.gif"
         },
-        // {
-        //     heading: "Seated Knee Flexion & Extension",
-        //     description:
-        //         "Follow step-by-step instructions tailored to your physiotherapy needs.",
-        //     href: "/exercise/squart",
-        //     img: "/seatedKnee.png"
-        // },
+        {
+            heading: "Virtual Keyboard",
+            description:
+                "Follow step-by-step instructions tailored to your physiotherapy needs.",
+            href: "/virtualkeyboard",
+            img: "/virtualkeyboard.gif"
+        },
         // {
         //     heading: "Standing Quad Stretch",
         //     description:
