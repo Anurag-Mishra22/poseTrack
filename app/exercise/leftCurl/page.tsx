@@ -136,8 +136,8 @@ export default function Home() {
             // When the angle is greater than 160°, set the stage to 'down'
             if (
                 leftShoulder?.score > 0.8 &&
-                leftElbow?.score > 0.95 &&
-                leftWrist?.score > 0.95
+                leftElbow?.score > 0.8 &&
+                leftWrist?.score > 0.8
             ) {
 
                 if (leftAngle > 90 && (useLeftCurl.getState() as any).stageL === "up") {
@@ -167,8 +167,8 @@ export default function Home() {
 
         if (
             leftShoulder?.score > 0.8 &&
-            leftElbow?.score > 0.95 &&
-            leftWrist?.score > 0.95
+            leftElbow?.score > 0.8 &&
+            leftWrist?.score > 0.8
         ) {
             setWait(0);
             // Draw keypoints
