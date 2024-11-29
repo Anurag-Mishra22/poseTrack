@@ -171,7 +171,7 @@ export default function VirtualKeyboard() {
                             Math.pow(indexTip[1] - thumbTip[1], 2)
                         );
 
-                        if (distance < 30 && pinchDistance < 20) {
+                        if (distance < 30 && pinchDistance < 30) {
                             ctx.fillStyle = "#2ecc71";
                             ctx.fillRect(x, y, width, height);
                             ctx.fillStyle = "#fff";
