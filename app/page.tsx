@@ -11,6 +11,7 @@ export default async function Home() {
   const user = await currentUser();
 
   const email = user ? user.emailAddresses[0].emailAddress : '';
+  // console.log('Admin Email:', email);
   return (
     <div>
       <header className="sticky top-0 flex h-16 items-center justify-between gap-4 border-b bg-white">
