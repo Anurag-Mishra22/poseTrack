@@ -212,7 +212,7 @@ export default function VirtualKeyboard() {
 
                 >
                     {
-                        wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Detecting...</div> : null
+                        wait === 1 ? <div className="text-2xl text-black border-2 rounded-[12px] bg-white border-black p-2">Detecting...</div> : null
                     }
                 </div>
 
