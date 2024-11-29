@@ -137,7 +137,7 @@ export default function Home() {
             if (
                 leftShoulder?.score > 0.8 &&
                 leftElbow?.score > 0.8 &&
-                leftWrist?.score > 0.8
+                leftWrist?.score > 0.9
             ) {
 
                 if (leftAngle > 90 && (useLeftCurl.getState() as any).stageL === "up") {
@@ -168,7 +168,7 @@ export default function Home() {
         if (
             leftShoulder?.score > 0.8 &&
             leftElbow?.score > 0.8 &&
-            leftWrist?.score > 0.8
+            leftWrist?.score > 0.9
         ) {
             setWait(0);
             // Draw keypoints
