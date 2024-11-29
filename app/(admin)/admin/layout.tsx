@@ -18,7 +18,9 @@ export default async function AdminDashBoardLayout({ children }: { children: Rea
     // const { getUser } = getKindeServerSession();
     // const user = await getUser();
 
-    if (!user || user.emailAddresses[0].emailAddress !== "anurag2025mishra@gmail.com") {
+    if (!user ||
+        (user.emailAddresses[0].emailAddress !== "anurag2025mishra@gmail.com" &&
+            user.emailAddresses[0].emailAddress !== "arrymed2@gmail.com")) {
         return redirect("/");
     }
 

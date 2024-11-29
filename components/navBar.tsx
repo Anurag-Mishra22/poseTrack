@@ -22,7 +22,7 @@ const NavBar = (email: {
     return (
         <>
             {
-                email.email === "anurag2025mishra@gmail.com" &&
+                email.email === "anurag2025mishra@gmail.com" || email.email === "arrymed2@gmail.com" &&
 
                 LINKS.map(link => (
                     <Link key={link.href} href={link.href} className={cn(link.href === pathname ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>

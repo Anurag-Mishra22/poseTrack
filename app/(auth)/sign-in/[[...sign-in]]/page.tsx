@@ -39,7 +39,7 @@ export default function SignInPage() {
                             Login with Google
                         </Clerk.Connection>
                     </div>
-                    <p className="text-center text-sm text-neutral-400">
+                    {/* <p className="text-center text-sm text-neutral-400">
                         No account?{' '}
                         <Clerk.Link
                             navigate="sign-up"
@@ -47,7 +47,7 @@ export default function SignInPage() {
                         >
                             Create an account
                         </Clerk.Link>
-                    </p>
+                    </p> */}
                 </SignIn.Step>
             </SignIn.Root>
         </div>
