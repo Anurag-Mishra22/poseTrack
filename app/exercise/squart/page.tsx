@@ -61,7 +61,7 @@ export default function Home() {
                 await tf.setBackend('webgl'); // Use 'webgl' for better performance on most devices
                 await tf.ready();
 
-                console.log('TensorFlow.js is ready.');
+                // console.log('TensorFlow.js is ready.');
 
                 const model = poseDetection.SupportedModels.BlazePose;
                 const detector = await poseDetection.createDetector(model, {
@@ -184,7 +184,7 @@ export default function Home() {
                 if (leftKneeAngle < 110 && rightKneeAngle < 110 && (useSquat.getState() as any).stageS === "down") {
                     (useSquat.getState() as any).setStageS("up");
                     setSquatCount((count) => count + 1);
-                    console.log("Squat count incremented.");
+                    // console.log("Squat count incremented.");
                 }
 
                 if (leftKneeAngle > 110 && rightKneeAngle > 110 && (useSquat.getState() as any).stageS === "up") {

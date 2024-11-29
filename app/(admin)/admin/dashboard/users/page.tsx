@@ -52,7 +52,7 @@ export default function UsersPage() {
                 if (!data?.users?.data) {
                     throw new Error('Invalid response structure');
                 }
-                console.log(data?.users?.data);
+                // console.log(data?.users?.data);
                 return data?.users?.data;
             } catch (error: any) {
                 console.error('Error fetching data:', error.message);

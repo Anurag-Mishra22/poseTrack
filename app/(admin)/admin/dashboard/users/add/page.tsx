@@ -54,7 +54,7 @@ export default function MyForm() {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            console.log(values);
+            // console.log(values);
             createUser(values)
                 .then(() => {
                     toast(

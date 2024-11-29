@@ -18,7 +18,7 @@ const NavBar = (email: {
 }) => {
     const pathname = usePathname();
 
-    console.log('Admin Email:', process.env.ADMIN_EMAIL);
+    // console.log('Admin Email:', process.env.ADMIN_EMAIL);
     return (
         <>
             {
