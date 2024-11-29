@@ -3,9 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs";
 import * as handpose from "@tensorflow-models/handpose";
-import { useLeftCurl } from "@/store/useLeftCurl";
 
-const keys = [
+const KEYBOARD_LAYOUT = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
     ["A", "S", "D", "F", "G", "H", "J", "K", "L", ";"],
     ["Z", "X", "C", "V", "B", "N", "M", ",", ".", "/"],
@@ -18,12 +17,14 @@ export default function VirtualKeyboard() {
     const [detector, setDetector] = useState<handpose.HandPose | null>(null);
     const [videoReady, setVideoReady] = useState(false);
     const [outputText, setOutputText] = useState("");
-    const setStageL = useLeftCurl((state: any) => state.setStageL);
-    const stageL = useLeftCurl((state: any) => state.stageL);
-
     const [isCooldownActive, setCooldownActive] = useState(false);
-    const cooldownTime = 3000;
+    const [pressedKey, setPressedKey] = useState<string | null>(null);
+    const [wait, setWait] = useState(1);
+
+    const cooldownTime = 1000;
     const lastKeyPressed = useRef<string | null>(null);
+    const previousKeypoints = useRef<any[]>([]);
+    const smoothingFactor = 0.7;
 
     useEffect(() => {
         const initHandPose = async () => {
@@ -36,164 +37,149 @@ export default function VirtualKeyboard() {
                 console.error("Error initializing handpose model:", error);
             }
         };
-
         initHandPose();
     }, []);
 
     useEffect(() => {
         const initCamera = async () => {
-            try {
-                if (videoRef.current) {
+            if (videoRef.current) {
+                try {
                     const stream = await navigator.mediaDevices.getUserMedia({
-                        video: true
+                        video: {
+                            width: 640,
+                            height: 480
+                        }
                     });
                     videoRef.current.srcObject = stream;
-                    videoRef.current.onloadedmetadata = () => {
-                        videoRef.current!.width = videoRef.current!.videoWidth;
-                        videoRef.current!.height = videoRef.current!.videoHeight;
-                        setVideoReady(true);
-                    };
+                    videoRef.current.onloadedmetadata = () => setVideoReady(true);
+                } catch (error) {
+                    console.error("Error initializing camera:", error);
                 }
-            } catch (error) {
-                console.error("Error initializing video stream:", error);
             }
         };
-
         initCamera();
     }, []);
 
-    useEffect(() => {
-        if (detector && videoReady) {
-            detectHand();
-        }
-    }, [detector, videoReady]);
-
-    const detectHand = async () => {
-        if (detector && videoRef.current && canvasRef.current && videoReady) {
-            try {
-                const predictions = await detector.estimateHands(videoRef.current);
-                if (predictions.length > 0) {
-                    const ctx = canvasRef.current.getContext("2d");
-                    if (ctx) {
-                        ctx.clearRect(
-                            0,
-                            0,
-                            canvasRef.current.width,
-                            canvasRef.current.height
-                        );
-                        const keypoints = predictions[0].landmarks;
-                        detectPinchGesture(keypoints);
-                        drawKeyboard(keypoints);
-                        drawDotsAndLines(ctx, keypoints);
-                    }
-                }
-            } catch (error) {
-                console.error("Error during hand detection:", error);
-            }
-        }
-        requestAnimationFrame(detectHand);
+    const smoothPositions = (currentPoints: any[], previousPoints: any[]) => {
+        if (!previousPoints.length) return currentPoints;
+        return currentPoints.map((point, index) => {
+            const prev = previousPoints[index];
+            if (!prev) return point;
+            return [
+                prev[0] * smoothingFactor + point[0] * (1 - smoothingFactor),
+                prev[1] * smoothingFactor + point[1] * (1 - smoothingFactor),
+                prev[2] * smoothingFactor + point[2] * (1 - smoothingFactor)
+            ];
+        });
     };
 
-    const detectPinchGesture = (keypoints: any) => {
+    useEffect(() => {
+        const detectHand = async () => {
+            if (detector && videoRef.current && canvasRef.current && videoReady) {
+                try {
+                    const predictions = await detector.estimateHands(videoRef.current);
+                    const ctx = canvasRef.current.getContext("2d");
+
+                    if (predictions.length > 0 && ctx) {
+                        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+
+                        const currentKeypoints = predictions[0].landmarks;
+                        const smoothedKeypoints = smoothPositions(currentKeypoints, previousKeypoints.current);
+                        previousKeypoints.current = smoothedKeypoints;
+
+                        drawKeyboard(ctx, smoothedKeypoints);
+                        drawHandPoints(ctx, smoothedKeypoints);
+                    }
+                } catch (error) {
+                    console.error("Error during hand detection:", error);
+                }
+                requestAnimationFrame(detectHand);
+            }
+        };
+        detectHand();
+    }, [detector, videoReady]);
+
+    const drawKeyboard = (ctx: CanvasRenderingContext2D, keypoints: number[][]) => {
         const indexTip = keypoints[8];
         const thumbTip = keypoints[4];
-        const distance = Math.sqrt(
+        const pinchDistance = Math.sqrt(
             Math.pow(indexTip[0] - thumbTip[0], 2) +
             Math.pow(indexTip[1] - thumbTip[1], 2)
         );
+        setWait(0);
 
-        if (distance < 10) {
-            console.log("Pinch gesture detected.");
-        }
+        KEYBOARD_LAYOUT.forEach((row, rowIndex) => {
+            row.forEach((key, colIndex) => {
+                const x = 50 + colIndex * 60;
+                const y = 50 + rowIndex * 60;
+                const width = 50;
+                const height = 50;
+
+                // Change color based on pressed state
+                ctx.fillStyle = key === pressedKey ? "#4CAF50" : "#333";
+                ctx.fillRect(x, y, width, height);
+
+                // Add key highlight effect
+                if (key === pressedKey) {
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x, y, width, height);
+                }
+
+                ctx.fillStyle = "#fff";
+                ctx.font = "20px Arial";
+                ctx.fillText(key, x + 10, y + 30);
+
+                const keyCenter = {
+                    x: x + width / 2,
+                    y: y + height / 2
+                };
+
+                const fingerDistance = Math.sqrt(
+                    Math.pow(indexTip[0] - keyCenter.x, 2) +
+                    Math.pow(indexTip[1] - keyCenter.y, 2)
+                );
+
+                if (fingerDistance < 25 && pinchDistance < 40 && !isCooldownActive) {
+                    handleKeyPress(key);
+                }
+            });
+        });
     };
 
-    const drawDotsAndLines = (ctx: CanvasRenderingContext2D, keypoints: any) => {
-        const indexTip = keypoints[8]; // Index finger tip
-        const thumbTip = keypoints[4]; // Thumb tip
+    const drawHandPoints = (ctx: CanvasRenderingContext2D, keypoints: number[][]) => {
+        const indexTip = keypoints[8];
+        const thumbTip = keypoints[4];
 
-        console.log("Index tip:", indexTip);
+        [indexTip, thumbTip].forEach((point, i) => {
+            ctx.beginPath();
+            ctx.arc(point[0], point[1], 5, 0, Math.PI * 2);
+            ctx.fillStyle = i === 0 ? "#00ff00" : "#ff0000";
+            ctx.fill();
+        });
 
-        // Draw dot on index tip
-        ctx.beginPath();
-        ctx.arc(indexTip[0], indexTip[1], 5, 0, Math.PI * 2);
-        ctx.fillStyle = "red";
-        ctx.fill();
-
-        // Draw dot on thumb tip
-        ctx.beginPath();
-        ctx.arc(thumbTip[0], thumbTip[1], 5, 0, Math.PI * 2);
-        ctx.fillStyle = "blue";
-        ctx.fill();
-
-        // Draw line between index and thumb
         ctx.beginPath();
         ctx.moveTo(indexTip[0], indexTip[1]);
         ctx.lineTo(thumbTip[0], thumbTip[1]);
-        ctx.strokeStyle = "green";
+        ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
         ctx.stroke();
     };
 
-    const drawKeyboard = (keypoints: any) => {
-        if (canvasRef.current) {
-            const ctx = canvasRef.current.getContext("2d");
-            if (ctx) {
-                ctx.clearRect(
-                    0,
-                    0,
-                    canvasRef.current.width,
-                    canvasRef.current.height
-                );
-            }
-
-            keys.forEach((row, rowIndex) => {
-                row.forEach((key, colIndex) => {
-                    const x = 50 + colIndex * 100;
-                    const y = 50 + rowIndex * 100;
-                    const width = 40;
-                    const height = 40;
-
-                    if (ctx) {
-                        ctx.fillStyle = "#fff";
-                        ctx.font = "30px Arial";
-                        ctx.fillText(key, x + 10, y + 40);
-
-                        const indexTip = keypoints[8];
-                        const thumbTip = keypoints[4];
-
-                        const distance = Math.sqrt(
-                            Math.pow(indexTip[0] - (x + width / 2), 2) +
-                            Math.pow(indexTip[1] - (y + height / 2), 2)
-                        );
-
-                        const pinchDistance = Math.sqrt(
-                            Math.pow(indexTip[0] - thumbTip[0], 2) +
-                            Math.pow(indexTip[1] - thumbTip[1], 2)
-                        );
-
-                        if (distance < 30 && pinchDistance < 30) {
-                            ctx.fillStyle = "#2ecc71";
-                            ctx.fillRect(x, y, width, height);
-                            ctx.fillStyle = "#fff";
-                            ctx.fillText(key, x + 20, y + 50);
-
-                            handleButtonClick(key);
-                        }
-                    }
-                });
-            });
-        }
-    };
-
-    const handleButtonClick = (key: string) => {
+    const handleKeyPress = (key: string) => {
         if (isCooldownActive || lastKeyPressed.current === key) return;
 
-        if (key === "SPACE") {
-            setOutputText((prev) => prev + " ");
-        } else if (key === "BS") {
-            setOutputText((prev) => prev.slice(0, -1));
-        } else {
-            setOutputText((prev) => prev + key);
+        setPressedKey(key);
+
+        switch (key) {
+            case "SPACE":
+                setOutputText(prev => prev + " ");
+                break;
+            case "BS":
+                setOutputText(prev => prev.slice(0, -1));
+                break;
+            default:
+                setOutputText(prev => prev + key);
         }
 
         lastKeyPressed.current = key;
@@ -201,32 +187,41 @@ export default function VirtualKeyboard() {
         setTimeout(() => {
             setCooldownActive(false);
             lastKeyPressed.current = null;
+            setPressedKey(null);
         }, cooldownTime);
     };
 
     return (
-        <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
-            <div className="webcam-container relative w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px] overflow-hidden">
-                {/* Overlay Background */}
-                <div className="absolute top-0 left-0 w-full h-full bg-black opacity-50 z-10"></div>
-
+        <div className="flex flex-col md:flex-row gap-6 p-4">
+            <div className="relative w-full md:w-[640px] aspect-video hidden md:flex">
                 <video
                     ref={videoRef}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] z-0"
+                    className="absolute inset-0 w-full h-full object-cover rounded-lg"
                     autoPlay
-                    muted
                     playsInline
+                    muted
                 />
                 <canvas
                     ref={canvasRef}
                     width={640}
                     height={480}
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none z-20"
+                    className="absolute inset-0 w-full h-full"
                 />
-            </div>
+                <div
+                    className="absolute top-2 left-2 gap-x-6 "
 
-            <div className="flex flex-col gap-y-4 w-full justify-center max-w-[400px]">
-                <h2 className="max-w-[400px] text-xl">Output Text: {outputText}</h2>
+                >
+                    {
+                        wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Detecting...</div> : null
+                    }
+                </div>
+
+            </div>
+            <div className="flex-1 p-4 bg-gray-800  rounded-lg">
+                <h2 className="text-xl text-white mb-4 ">Output Text:</h2>
+                <div className="bg-white p-4 rounded min-h-[400px] text-lg max-w-[480px]">
+                    {outputText || "Start typing..."}
+                </div>
             </div>
         </div>
     );
