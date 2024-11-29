@@ -175,7 +175,7 @@ export default function VirtualKeyboard() {
                             ctx.fillStyle = "#2ecc71";
                             ctx.fillRect(x, y, width, height);
                             ctx.fillStyle = "#fff";
-                            ctx.fillText(key, x + 10, y + 40);
+                            ctx.fillText(key, x + 20, y + 50);
 
                             handleButtonClick(key);
                         }
