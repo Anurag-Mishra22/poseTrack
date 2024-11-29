@@ -250,7 +250,7 @@ export default function Home() {
     return (
         <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
             <div
-                className="webcam-container relative w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px] overflow-hidden"
+                className="webcam-container hidden md:flex relative w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px] overflow-hidden"
             >
                 <video
                     ref={videoRef}
