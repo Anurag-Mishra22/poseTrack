@@ -1,8 +1,8 @@
-"use client";
+"use client"
 import { useEffect, useRef, useState } from "react";
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs";
-import * as poseDetection from "@tensorflow-models/pose-detection";
+import *  as poseDetection from "@tensorflow-models/pose-detection";
 import { useLeftCurl } from "@/store/useLeftCurl";
 import { SquareCheck } from "lucide-react";
 import Image from "next/image";
@@ -29,7 +29,6 @@ export default function Home() {
     const stageL = useLeftCurl((state: any) => state.stageL);
     const [wait, setWait] = useState(1);
 
-    // Performance optimization refs
     const rafId = useRef<number>();
     const lastFrameTime = useRef<number>(0);
     const targetFPS = 30;
@@ -133,19 +132,27 @@ export default function Home() {
         if (leftWrist?.score > threshold && leftElbow?.score > threshold && leftShoulder?.score > threshold) {
             setWait(0);
 
+            ctx.save();
+            ctx.scale(-1, 1);
+            ctx.translate(-ctx.canvas.width, 0);
+
             // Draw keypoints
             keypoints.forEach((point: any) => {
                 if (targetKeypoints.includes(point.name) && point.score > threshold) {
                     ctx.beginPath();
-                    ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+                    ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
                     ctx.fillStyle = "aqua";
                     ctx.fill();
+                    ctx.strokeStyle = "white";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
                 }
             });
 
             // Draw lines
+            ctx.lineWidth = 3;
             ctx.strokeStyle = "aqua";
-            ctx.lineWidth = 2;
+
             const connections = [
                 ["left_shoulder", "left_elbow"],
                 ["left_elbow", "left_wrist"]
@@ -162,6 +169,8 @@ export default function Home() {
                     ctx.stroke();
                 }
             });
+
+            ctx.restore();
         }
     };
 
@@ -181,7 +190,7 @@ export default function Home() {
         try {
             const poses = await detector.estimatePoses(videoRef.current, {
                 maxPoses: 1,
-                flipHorizontal: false,
+                flipHorizontal: true, // Enable horizontal flip
                 scoreThreshold: 0.7
             });
 
@@ -213,17 +222,14 @@ export default function Home() {
 
     return (
         <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
-            <div
-                className="webcam-container hidden md:flex relative w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px] overflow-hidden"
-            >
+            <div className="webcam-container hidden md:flex relative w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px] overflow-hidden">
                 <video
                     ref={videoRef}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] md:max-w-[640px]"
+                    className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] md:max-w-[640px] transform scale-x-[-1]"
                     autoPlay
                     muted
                     playsInline
                 />
-
                 <canvas
                     ref={canvasRef}
                     width={640}
@@ -241,7 +247,7 @@ export default function Home() {
                     <>
                         <div className="absolute top-2 left-2">
                             <div className="flex flex-col gap-y-4">
-                                <div className=" p-4 border-2 border-black bg-white rounded-[12px]">
+                                <div className="p-4 border-2 border-black bg-white rounded-[12px]">
                                     <div className="flex flex-row items-center gap-x-2">
                                         <Image
                                             src="/bicepcurlgif.gif"
@@ -252,7 +258,7 @@ export default function Home() {
                                         <p className="text-xl">{curlCount}</p>
                                     </div>
                                 </div>
-                                <div className=" rounded-[12px] text-xl items-center justify-center flex p-4 border-2 border-black bg-white">
+                                <div className="rounded-[12px] text-xl items-center justify-center flex p-4 border-2 border-black bg-white">
                                     {stageL}
                                 </div>
                             </div>
@@ -261,7 +267,7 @@ export default function Home() {
                 )}
             </div>
 
-            <div className="flex flex-col gap-y-4 w-full  justify-center">
+            <div className="flex flex-col gap-y-4 w-full justify-center">
                 <div className="text-3xl md:text-4xl lg:text-5xl font-bold">
                     <span className="text-[#02a8c0]">Reference Video</span>
                 </div>
@@ -275,22 +281,35 @@ export default function Home() {
                             className={`border-[1px] rounded-md p-2 text-start gap-2 flex flex-col ${index % 2 === 0 ? "mr-0" : "ml-0"}`}
                             key={index}
                         >
-                            <div className="flex gap-2 items-center">
-                                <div>
-                                    <SquareCheck className="w-5 h-5 text-[#02a8c0]" />
-                                </div>
-                                <div className="font-bold">{lang.heading}</div>
-                            </div>
-                            <div className="text-gray-500">{lang.description}</div>
+                            <h3 className="text-lg font-semibold">{lang.heading}</h3>
+                            <p>{lang.description}</p>
                         </div>
                     ))}
+                </div>
+
+                <div className="flex flex-col gap-4 p-2">
+                    <div className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                        <span className="text-[#02a8c0]">How to Perform the Exercise</span>
+                    </div>
+                    <p className="text-lg">
+                        Ensure that your arm stays aligned with the body and that you move the weight only through your elbow joint for proper form.
+                        Keep your movements slow and controlled, and avoid swinging the weight for maximum effectiveness.
+                    </p>
+
+                    <div className="flex gap-2">
+                        <SquareCheck size={30} className="text-green-500" />
+                        <p>Keep the elbow close to your body</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <SquareCheck size={30} className="text-green-500" />
+                        <p>Control the descent to maximize muscle engagement</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <SquareCheck size={30} className="text-green-500" />
+                        <p>Do not allow the wrist to rotate during the curl</p>
+                    </div>
                 </div>
             </div>
         </div>
     );
-
 }
-
-
-
-

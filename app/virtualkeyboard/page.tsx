@@ -116,7 +116,7 @@ export default function VirtualKeyboard() {
                 const height = 50;
 
                 // Change color based on pressed state
-                ctx.fillStyle = key === pressedKey ? "#4CAF50" : "#333";
+                ctx.fillStyle = key === pressedKey ? "#4caf50" : "#333";
                 ctx.fillRect(x, y, width, height);
 
                 // Add key highlight effect
