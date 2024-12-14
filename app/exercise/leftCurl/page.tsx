@@ -6,6 +6,7 @@ import *  as poseDetection from "@tensorflow-models/pose-detection";
 import { useLeftCurl } from "@/store/useLeftCurl";
 import { SquareCheck } from "lucide-react";
 import Image from "next/image";
+import { initializeTensorFlow } from "@/lib/tfjs-setup";
 
 type Exercise = {
     heading: string;
@@ -37,8 +38,7 @@ export default function Home() {
     useEffect(() => {
         const initPoseDetection = async () => {
             try {
-                await tf.setBackend('webgl');
-                await tf.ready();
+                await initializeTensorFlow();
 
                 const model = poseDetection.SupportedModels.BlazePose;
                 const detector = await poseDetection.createDetector(model, {
@@ -119,6 +119,8 @@ export default function Home() {
                 (useLeftCurl.getState() as any).setStageL("up");
                 setCurlCount(prev => prev + 1);
             }
+        } else {
+            setWait(1);
         }
     };
 
@@ -239,7 +241,7 @@ export default function Home() {
                 {wait === 1 ? (
                     <div className="text-2xl absolute top-2 left-2 text-black border-2 bg-white border-black p-2">
                         <div className="flex items-center gap-x-2 justify-center">
-                            <p>Detecting</p>
+                            <p>Detecting Plz bring your left hand inside frame.</p>
                             <p className="animate-pulse text-4xl flex items-center justify-center">...</p>
                         </div>
                     </div>

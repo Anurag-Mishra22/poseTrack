@@ -1,12 +1,16 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
+
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs";
 import * as poseDetection from "@tensorflow-models/pose-detection";
 import { useSquat } from "@/store/useSquart";
 import { SquareCheck } from "lucide-react";
 import Image from "next/image";
+import { initializeTensorFlow } from "@/lib/tfjs-setup";
+
+
 
 // Define threshold constants
 const getThresholds = (isBeginner: boolean) => ({
@@ -43,8 +47,8 @@ export default function Home() {
     const [videoReady, setVideoReady] = useState(false);
     const [isBeginnerMode, setIsBeginnerMode] = useState(true);
 
-    const [leftKneeAngle, setLeftKneeAngle] = useState(0);
-    const [rightKneeAngle, setRightKneeAngle] = useState(0);
+    const [leftKneeAngle, setLeftKneeAngle] = useState(180);
+    const [rightKneeAngle, setRightKneeAngle] = useState(180);
     const [backAngle, setBackAngle] = useState(0);
     const [backPosture, setBackPosture] = useState(false);
 
@@ -55,13 +59,11 @@ export default function Home() {
 
     // Initialize PoseNet model
     useEffect(() => {
+        let isSubscribed = true;
+
         const initPoseDetection = async () => {
             try {
-                // Set the backend and wait for TensorFlow.js to be ready
-                await tf.setBackend('webgl'); // Use 'webgl' for better performance on most devices
-                await tf.ready();
-
-                // console.log('TensorFlow.js is ready.');
+                await initializeTensorFlow(); // Use the singleton initialization
 
                 const model = poseDetection.SupportedModels.BlazePose;
                 const detector = await poseDetection.createDetector(model, {
@@ -70,16 +72,20 @@ export default function Home() {
                     maxPoses: 1,
                 } as poseDetection.BlazePoseTfjsModelConfig);
 
-                setDetector(detector);
-                console.log("Pose detector initialized.");
+                if (isSubscribed) {
+                    setDetector(detector);
+                }
             } catch (error) {
                 console.error("Error initializing pose detector:", error);
             }
         };
 
         initPoseDetection();
-    }, []);
 
+        return () => {
+            isSubscribed = false;
+        };
+    }, []);
     // Initialize camera
     useEffect(() => {
         const initCamera = async () => {
@@ -95,7 +101,7 @@ export default function Home() {
                         videoRef.current!.width = videoRef.current!.videoWidth;
                         videoRef.current!.height = videoRef.current!.videoHeight;
                         setVideoReady(true); // Set video ready flag to true
-                        console.log("Video stream initialized.");
+                        // console.log("Video stream initialized.");
                     };
                 }
             } catch (error) {
@@ -163,6 +169,8 @@ export default function Home() {
         const rightKnee = keypoints.find((kp: any) => kp.name === "right_knee");
         const rightAnkle = keypoints.find((kp: any) => kp.name === "right_ankle");
 
+
+
         if (
             leftHip?.score > 0.7 &&
             leftKnee?.score > 0.7 &&
@@ -195,100 +203,226 @@ export default function Home() {
             } else {
                 console.warn("Some keypoints are missing.");
             }
+        } else if (leftHip?.score > 0.7 &&
+            leftKnee?.score > 0.7 &&
+            leftAnkle?.score > 0.7
+        ) {
+            if (leftHip && leftKnee && leftAnkle) {
+                const leftKneeAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+                // const rightKneeAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+                // Validate back posture
+                const { backAngle, isGoodPosture } = validateBackPosture(keypoints);
+                setBackAngle(backAngle || 0);
+                setBackPosture(isGoodPosture);
+
+
+                if (leftKneeAngle < 110 && (useSquat.getState() as any).stageS === "down") {
+                    (useSquat.getState() as any).setStageS("up");
+                    setSquatCount((count) => count + 1);
+                    // console.log("Squat count incremented.");
+                }
+
+                if (leftKneeAngle > 110 && (useSquat.getState() as any).stageS === "up") {
+
+                    (useSquat.getState() as any).setStageS("down");
+
+                }
+            } else {
+                console.warn("Some keypoints are missing.");
+            }
+
+        } else if (
+            rightHip?.score > 0.7 &&
+            rightKnee?.score > 0.7 &&
+            rightAnkle?.score > 0.7) {
+            if (rightHip && rightKnee && rightAnkle) {
+                // const leftKneeAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+                const rightKneeAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+                // Validate back posture
+                const { backAngle, isGoodPosture } = validateBackPosture(keypoints);
+                setBackAngle(backAngle || 0);
+                setBackPosture(isGoodPosture);
+
+
+                if (rightKneeAngle < 110 && (useSquat.getState() as any).stageS === "down") {
+                    (useSquat.getState() as any).setStageS("up");
+                    setSquatCount((count) => count + 1);
+                    // console.log("Squat count incremented.");
+                }
+
+                if (rightKneeAngle > 110 && (useSquat.getState() as any).stageS === "up") {
+
+                    (useSquat.getState() as any).setStageS("down");
+
+                }
+            } else {
+                console.warn("Some keypoints are missing.");
+            }
+
+        } else {
+            setWait(1);
         }
     };
 
     // Function to draw keypoints and lines between them
     const drawKeypointsAndLines = (keypoints: any, ctx: any) => {
+
+        const leftHip = keypoints.find((kp: any) => kp.name === "left_hip");
+        const leftKnee = keypoints.find((kp: any) => kp.name === "left_knee");
+        const leftAnkle = keypoints.find((kp: any) => kp.name === "left_ankle");
+        const rightHip = keypoints.find((kp: any) => kp.name === "right_hip");
+        const rightKnee = keypoints.find((kp: any) => kp.name === "right_knee");
+        const rightAnkle = keypoints.find((kp: any) => kp.name === "right_ankle");
         const threshold = 0.5;
+        // console.log("keypoints", keypoints);
 
 
 
-        // Find the target keypoints
-        const leftHip = keypoints.find((kp: any) => kp.name === "left_hip" && kp.score > threshold);
-        const leftKnee = keypoints.find((kp: any) => kp.name === "left_knee" && kp.score > threshold);
-        const leftAnkle = keypoints.find((kp: any) => kp.name === "left_ankle" && kp.score > threshold);
-        const rightHip = keypoints.find((kp: any) => kp.name === "right_hip" && kp.score > threshold);
-        const rightKnee = keypoints.find((kp: any) => kp.name === "right_knee" && kp.score > threshold);
-        const rightAnkle = keypoints.find((kp: any) => kp.name === "right_ankle" && kp.score > threshold);
+        // Define body segments for drawing
+        const segments = [
+            // Face
+            {
+                points: ['nose', 'left_eye', 'right_eye'],
+                color: '#0000FF'
+            },
+            {
+                points: ['left_eye', 'left_ear'],
+                color: '#0000FF'
+            },
+            {
+                points: ['right_eye', 'right_ear'],
+                color: '#0000FF'
+            },
+            {
+                points: ['left_shoulder', 'mouth_left'],
+                color: '#0000FF'
+            },
+            {
+                points: ['right_shoulder', 'mouth_right'],
+                color: '#0000FF'
+            },
 
-        // Find keypoints for back posture
-        const leftShoulder = keypoints.find((kp: any) => kp.name === "left_shoulder" && kp.score > threshold);
-        const rightShoulder = keypoints.find((kp: any) => kp.name === "right_shoulder" && kp.score > threshold);
+            {
+                points: ['right_mouth', 'left_mouth'],
+                color: '#0000FF'
+            },
 
-        // console.log("Keypoints:", leftHip, leftKnee, leftAnkle, rightHip, rightKnee, rightAnkle);
-        const leftKneeAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
-        setLeftKneeAngle(leftKneeAngle);
-        const rightKneeAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
-        setRightKneeAngle(rightKneeAngle);
+            // Arms (detailed)
+            {
+                points: ['left_shoulder', 'left_elbow', 'left_wrist'],
+                color: '#0000FF'
+            },
+            {
+                points: ['right_shoulder', 'right_elbow', 'right_wrist'],
+                color: '#0000FF'
+            },
 
+            // Hands
+            {
+                points: ['left_wrist', 'left_pinky', 'left_index', 'left_thumb'],
+                color: '#0000FF'
+            },
+            {
+                points: ['right_wrist', 'right_pinky', 'right_index', 'right_thumb'],
+                color: '#0000FF'
+            },
+
+            // Torso (detailed)
+            {
+                points: ['left_shoulder', 'right_shoulder'],
+                color: '#0000FF'
+            },
+            {
+                points: ['left_shoulder', 'left_hip'],
+                color: '#0000FF'
+            },
+            {
+                points: ['right_shoulder', 'right_hip'],
+                color: '#0000FF'
+            },
+            {
+                points: ['left_hip', 'right_hip'],
+                color: '#0000FF'
+            },
+
+            // Legs (detailed)
+            {
+                points: ['left_hip', 'left_knee', 'left_ankle'],
+                color: '#0000FF'
+            },
+            {
+                points: ['right_hip', 'right_knee', 'right_ankle'],
+                color: '#0000FF'
+            },
+
+            // Feet
+            {
+                points: ['left_ankle', 'left_heel', 'left_foot_index'],
+                color: '#8A2BE2'
+            },
+            {
+                points: ['right_ankle', 'right_heel', 'right_foot_index'],
+                color: '#8A2BE2'
+            }
+        ];
+
+        // Helper function to draw a point
         if (
-            leftHip?.score > 0.7 &&
-            leftKnee?.score > 0.7 &&
-            leftAnkle?.score > 0.7 &&
-            rightHip?.score > 0.7 &&
-            rightKnee?.score > 0.7 &&
-            rightAnkle?.score > 0.7 &&
-            leftShoulder?.score > 0.7 &&
-            rightShoulder?.score > 0.7
-
+            (leftHip?.score > 0.7 &&
+                leftKnee?.score > 0.7 &&
+                leftAnkle?.score > 0.7) ||
+            (rightHip?.score > 0.7 &&
+                rightKnee?.score > 0.7 &&
+                rightAnkle?.score > 0.7)
         ) {
-            setWait(0);
-            // Ensure all keypoints are valid before drawing
-            if (
-                leftHip && leftKnee && leftAnkle &&
-                rightHip && rightKnee && rightAnkle &&
-                leftShoulder && rightShoulder
-            ) {
+            const leftKneeAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+            setLeftKneeAngle(leftKneeAngle);
+            const rightKneeAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+            setRightKneeAngle(rightKneeAngle);
+            const drawPoint = (x: number, y: number, color: string = '#FF0000') => {
                 ctx.beginPath();
-
-                // Draw the left side (hip -> knee -> ankle)
-                ctx.moveTo(leftHip.x, leftHip.y);
-                ctx.lineTo(leftKnee.x, leftKnee.y);
-                ctx.lineTo(leftAnkle.x, leftAnkle.y);
-
-                // Draw the right side (hip -> knee -> ankle)
-                ctx.moveTo(rightHip.x, rightHip.y);
-                ctx.lineTo(rightKnee.x, rightKnee.y);
-                ctx.lineTo(rightAnkle.x, rightAnkle.y);
-
-                // Draw back posture (shoulders to hips)
-                ctx.moveTo(leftShoulder.x, leftShoulder.y);
-                ctx.lineTo(leftHip.x, leftHip.y);
-
-                ctx.moveTo(rightShoulder.x, rightShoulder.y);
-                ctx.lineTo(rightHip.x, rightHip.y);
-
-                // Set styling for the lines
-                ctx.strokeStyle = "aqua";
+                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#FFFFFF';
                 ctx.lineWidth = 2;
                 ctx.stroke();
+            };
 
-
-
-                // Draw dots at each keypoint
-                const drawDot = (x: number, y: number) => {
+            // Helper function to draw a line
+            const drawLine = (start: any, end: any, color: string) => {
+                if (start && end && start.score > threshold && end.score > threshold) {
                     ctx.beginPath();
-                    ctx.arc(x, y, 4, 0, 2 * Math.PI);
-                    ctx.fillStyle = "red";
-                    ctx.fill();
-                };
+                    ctx.moveTo(start.x, start.y);
+                    ctx.lineTo(end.x, end.y);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+            };
 
-                drawDot(leftHip.x, leftHip.y);
-                drawDot(leftKnee.x, leftKnee.y);
-                drawDot(leftAnkle.x, leftAnkle.y);
-                drawDot(rightHip.x, rightHip.y);
-                drawDot(rightKnee.x, rightKnee.y);
-                drawDot(rightAnkle.x, rightAnkle.y);
+            // Draw segments
+            segments.forEach(segment => {
+                for (let i = 0; i < segment.points.length - 1; i++) {
+                    const point1 = keypoints.find((kp: any) => kp.name === segment.points[i]);
+                    const point2 = keypoints.find((kp: any) => kp.name === segment.points[i + 1]);
 
-                // Draw dots for back posture
-                drawDot(leftShoulder.x, leftShoulder.y);
-                drawDot(rightShoulder.x, rightShoulder.y);
-            } else {
-                console.warn("Some keypoints are missing or below the threshold score.");
-            }
+                    if (point1 && point2) {
+                        drawLine(point1, point2, segment.color);
+                    }
+                }
+            });
 
+            // Draw all keypoints
+            keypoints.forEach((keypoint: any) => {
+                if (keypoint.score > threshold) {
+                    drawPoint(keypoint.x, keypoint.y);
+                }
+            });
+
+            setWait(0);
         }
+
     };
 
 
@@ -345,7 +479,7 @@ export default function Home() {
 
                 >
                     {
-                        wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Detecting...</div> : <>
+                        wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Detecting Plz bring your full body inside frame...</div> : <>
 
                             <div className="flex flex-col gap-y-2 text-sm">
                                 <div className="flex flex-col gap-y-4">
