@@ -70,6 +70,7 @@ export default function Home() {
                     runtime: "tfjs",
                     modelType: "lite",
                     maxPoses: 1,
+                    flipHorizontal: true // Add this line
                 } as poseDetection.BlazePoseTfjsModelConfig);
 
                 if (isSubscribed) {
@@ -283,86 +284,86 @@ export default function Home() {
             // Face
             {
                 points: ['nose', 'left_eye', 'right_eye'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['left_eye', 'left_ear'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['right_eye', 'right_ear'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['left_shoulder', 'mouth_left'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['right_shoulder', 'mouth_right'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
 
             {
                 points: ['right_mouth', 'left_mouth'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
 
             // Arms (detailed)
             {
                 points: ['left_shoulder', 'left_elbow', 'left_wrist'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['right_shoulder', 'right_elbow', 'right_wrist'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
 
             // Hands
             {
                 points: ['left_wrist', 'left_pinky', 'left_index', 'left_thumb'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['right_wrist', 'right_pinky', 'right_index', 'right_thumb'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
 
             // Torso (detailed)
             {
                 points: ['left_shoulder', 'right_shoulder'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['left_shoulder', 'left_hip'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['right_shoulder', 'right_hip'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['left_hip', 'right_hip'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
 
             // Legs (detailed)
             {
                 points: ['left_hip', 'left_knee', 'left_ankle'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
             {
                 points: ['right_hip', 'right_knee', 'right_ankle'],
-                color: '#0000FF'
+                color: '#55ff00'
             },
 
             // Feet
             {
                 points: ['left_ankle', 'left_heel', 'left_foot_index'],
-                color: '#8A2BE2'
+                color: '#55ff00'
             },
             {
                 points: ['right_ankle', 'right_heel', 'right_foot_index'],
-                color: '#8A2BE2'
+                color: '#55ff00'
             }
         ];
 
@@ -459,67 +460,89 @@ export default function Home() {
             <div
                 className="webcam-container hidden md:flex relative w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px] overflow-hidden"
             >
+             // Update video element styles
                 <video
                     ref={videoRef}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] md:max-w-[640px]"
+                    className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] md:max-w-[640px] transform scale-x-[-1]" // Add transform scale-x-[-1]
                     autoPlay
                     muted
                     playsInline
                 />
 
+// Update canvas element styles
                 <canvas
                     ref={canvasRef}
                     width={640}
                     height={480}
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none md:max-w-[640px]"
+                    className="absolute top-0 left-0 w-full h-full pointer-events-none md:max-w-[640px] transform scale-x-[-1]" // Add transform scale-x-[-1]
                 />
 
-                <div
-                    className="absolute top-2 left-2 gap-x-6 "
-
-                >
-                    {
-                        wait === 1 ? <div className="text-2xl text-black border-2 bg-white border-black p-2">Detecting Plz bring your full body inside frame...</div> : <>
-
-                            <div className="flex flex-col gap-y-2 text-sm">
-                                <div className="flex flex-col gap-y-4">
-                                    <div className=" p-4 border-2 border-black bg-white flex items-center justify-center rounded-[12px] ">
-                                        <div className="flex flex-row items-center gap-x-2">
-                                            <Image
-                                                src="/squatgi.gif"
-                                                height={30}
-                                                width={30}
-                                                alt="squat"
-                                            />
-                                            <p className="text-xl">{squatCount}</p>
-                                        </div>
-                                    </div>
-
+                {
+                    wait === 1 ? (<div className="text-2xl absolute top-2 left-2 text-black border-2 bg-white border-black p-2">
+                        <div className="flex items-center gap-x-2 justify-center">
+                            {/* <p>Detecting Plz bring your left hand inside frame.</p> */}
+                            <div className="flex flex-col gap-4 p-2">
+                                <div className="text-xl md:text-2xl lg:text-2xl font-bold">
+                                    <span className="text-[#02a8c0]">Detecting</span>
                                 </div>
 
-                                <div className="bg-white rounded-[12px] flex items-center justify-center border-black border-2 p-4">
+
+                                <div className="flex gap-2">
+                                    <SquareCheck size={30} className="text-green-500" />
+                                    <p>Plz bring your Full Body inside Frame</p>
+                                </div>
+                                {/* <div className="flex gap-2">
+                                        <SquareCheck size={30} className="text-green-500" />
+                                        <p>Wrist, Elbow, Shoulder</p>
+                                    </div> */}
+                                {/* <div className="flex gap-2">
+                                    <SquareCheck size={30} className="text-green-500" />
+                                    <p>Do not allow the wrist to rotate during the curl</p>
+                                </div> */}
+                            </div>
+                            {/* <p className="animate-pulse text-4xl flex items-center justify-center">...</p> */}
+                        </div>
+                    </div>) : <>
+
+                        <div className="flex flex-col absolute top-2 left-2 gap-y-2 text-sm">
+                            <div className="flex flex-col gap-y-4">
+                                <div className=" p-4 border-2 border-black bg-white flex items-center justify-center rounded-[12px] ">
                                     <div className="flex flex-row items-center gap-x-2">
                                         <Image
-                                            src="/angle.png"
+                                            src="/squatgi.gif"
                                             height={30}
                                             width={30}
-                                            alt="angle"
+                                            alt="squat"
                                         />
-                                        <p className="text-xl"> {Math.round(leftKneeAngle)}°</p>
+                                        <p className="text-xl">{squatCount}</p>
                                     </div>
-
-
                                 </div>
-                                {/* <div className="bg-white rounded-[12px] border-black border-2 p-4">
+
+                            </div>
+
+                            <div className="bg-white rounded-[12px] flex items-center justify-center border-black border-2 p-4">
+                                <div className="flex flex-row items-center gap-x-2">
+                                    <Image
+                                        src="/angle.png"
+                                        height={30}
+                                        width={30}
+                                        alt="angle"
+                                    />
+                                    <p className="text-xl"> {Math.round(leftKneeAngle)}°</p>
+                                </div>
+
+
+                            </div>
+                            {/* <div className="bg-white rounded-[12px] border-black border-2 p-4">
                                     <p>Right Knee Angle: {Math.round(rightKneeAngle)}°</p>
                                 </div> */}
-                                {/* // const isGoodPosture = backAngle >= 10 && backAngle <= 18; // Adjustable threshold
+                            {/* // const isGoodPosture = backAngle >= 10 && backAngle <= 18; // Adjustable threshold
             return { backAngle, isGoodPosture };  // bend forward  45 bend backward  */}
 
-                                {/* <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                            {/* <div className="bg-white rounded-[12px] border-black border-2 p-4">
                                     <p>Back Angle: {Math.round(backAngle)}°</p>
                                 </div> */}
-                                {/* <div className="bg-white rounded-[12px] border-black border-2 p-4">
+                            {/* <div className="bg-white rounded-[12px] border-black border-2 p-4">
                                     <p>{
                                         backAngle >= 10 && backAngle <= 18 ? "Bend Backword" : backAngle > 18 && backAngle < 45 ? "Good Posture" : "Bend Forward"
 
@@ -527,33 +550,34 @@ export default function Home() {
                                     }</p>
                                 </div> */}
 
-                            </div>
-
-
                             {
                                 rightKneeAngle < 110 && leftKneeAngle < 110 && rightKneeAngle > 80 && leftKneeAngle > 80 &&
-                                <div className="bg-green-400 rounded-[12px] border-black border-2 p-2 w-40 mt-2 flex items-center justify-center">
+                                <div className="bg-green-400 rounded-[12px]  border-black border-2 p-2 w-40 mt-2 flex items-center justify-center">
                                     <p className="text-black p-2 rounded-md"> Good Squart</p>
                                 </div>
 
                             }
                             {
                                 (rightKneeAngle > 110 || leftKneeAngle > 110) &&
-                                <div className="bg-white rounded-[12px] border-black border-2 p-2 w-32 mt-2 flex items-center justify-center">
+                                <div className="bg-white rounded-[12px]  border-black border-2 p-2 w-32 mt-2 flex items-center justify-center">
                                     <p className="text-black p-2 rounded-md">Relax</p>
                                 </div>
                             }
                             {
                                 (rightKneeAngle < 80 || leftKneeAngle < 80) &&
-                                <div className="bg-red-600 rounded-[12px] border-black border-2 p-2 w-44 mt-2 flex items-center justify-center">
+                                <div className="bg-red-600 rounded-[12px]  border-black border-2 p-2 w-44 mt-2 flex items-center justify-center">
                                     <p className="text-white ">Squart too deep</p>
                                 </div>
                             }
 
 
-                        </>
-                    }
-                </div>
+                        </div>
+
+
+
+
+                    </>
+                }
 
 
             </div>
