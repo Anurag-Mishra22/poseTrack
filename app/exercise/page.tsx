@@ -24,14 +24,14 @@ const ExercisePage = () => {
             heading: "Squats",
             description:
                 "Follow step-by-step instructions tailored to your physiotherapy needs.",
-            href: "/exercise/squart",
+            href: "https://huggingface.co/spaces/Pratyush101/streamlit-webrtc-example",
             img: "/squatgif.gif"
         },
         {
             heading: "Virtual Keyboard",
             description:
                 "Follow step-by-step instructions tailored to your physiotherapy needs.",
-            href: "https://virtualkeyboardtry.yuwawork.in",
+            href: "https://huggingface.co/spaces/Pratyush101/streamlit-webrtc-example-experimental",
             img: "/virtualkeyboard.gif"
         },
         // {
