@@ -109,7 +109,7 @@ export default function Home() {
         const leftElbow = keypoints.find((kp: any) => kp.name === "left_elbow");
         const leftShoulder = keypoints.find((kp: any) => kp.name === "left_shoulder");
 
-        if (leftWrist?.score > 0.92 && leftElbow?.score > 0.8 && leftShoulder?.score > 0.8) {
+        if (leftWrist?.score > 0.7 && leftElbow?.score > 0.7 && leftShoulder?.score > 0.7) {
             const angle = calculateAngle(leftShoulder, leftElbow, leftWrist);
             setLeftAngle(Math.round(angle)); // Round the angle for cleaner display
 
@@ -127,13 +127,13 @@ export default function Home() {
     };
 
     const drawKeypointsAndLines = (keypoints: any, ctx: any) => {
-        const threshold = 0.8;
+        const threshold = 0.7;
         const targetKeypoints = ["left_wrist", "left_elbow", "left_shoulder"];
         const leftWrist = keypoints.find((kp: any) => kp.name === "left_wrist");
         const leftElbow = keypoints.find((kp: any) => kp.name === "left_elbow");
         const leftShoulder = keypoints.find((kp: any) => kp.name === "left_shoulder");
 
-        if (leftWrist?.score > 0.92 && leftElbow?.score > threshold && leftShoulder?.score > threshold) {
+        if (leftWrist?.score > 0.7 && leftElbow?.score > threshold && leftShoulder?.score > threshold) {
             setWait(0);
 
             ctx.save();
