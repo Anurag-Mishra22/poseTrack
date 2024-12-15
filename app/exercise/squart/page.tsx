@@ -460,7 +460,7 @@ export default function Home() {
             <div
                 className="webcam-container hidden md:flex relative w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px] overflow-hidden"
             >
-             // Update video element styles
+
                 <video
                     ref={videoRef}
                     className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] md:max-w-[640px] transform scale-x-[-1]" // Add transform scale-x-[-1]
@@ -469,7 +469,7 @@ export default function Home() {
                     playsInline
                 />
 
-// Update canvas element styles
+
                 <canvas
                     ref={canvasRef}
                     width={640}
