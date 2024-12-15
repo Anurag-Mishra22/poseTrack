@@ -31,7 +31,7 @@ const ExercisePage = () => {
             heading: "Virtual Keyboard",
             description:
                 "Follow step-by-step instructions tailored to your physiotherapy needs.",
-            href: "/virtualkeyboard",
+            href: "https://virtualkeyboardtry.vercel.app/",
             img: "/virtualkeyboard.gif"
         },
         // {
