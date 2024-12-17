@@ -478,15 +478,15 @@ export default function Home() {
         <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
             <div
                 ref={containerRef}
-                className={`webcam-container hidden md:flex relative ${isFullscreen
-                    ? "fixed inset-0 z-50 bg-black"
-                    : "w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px]"
+                className={`webcam-container relative ${isFullscreen
+                        ? "fixed inset-0 z-50 bg-black w-screen h-screen"
+                        : "w-full h-[calc(100vh-2rem)] md:max-w-[640px] md:h-96 lg:h-[480px]"
                     } overflow-hidden`}
             >
 
                 <video
                     ref={videoRef}
-                    className={`absolute top-0 left-0 w-full h-full ${isFullscreen ? "object-contain" : "object-cover"
+                    className={`absolute top-0 left-0 w-full h-full ${isFullscreen ? "object-cover md:object-contain" : "object-cover"
                         } rounded-[12px] transform scale-x-[-1]`}
                     autoPlay
                     muted
@@ -497,20 +497,20 @@ export default function Home() {
                     ref={canvasRef}
                     width={640}
                     height={480}
-                    className={`absolute top-0 left-0 w-full h-full ${isFullscreen ? "object-contain" : "object-cover"
+                    className={`absolute top-0 left-0 w-full h-full ${isFullscreen ? "object-cover md:object-contain" : "object-cover"
                         } pointer-events-none transform scale-x-[-1]`}
                 />
+
                 <button
                     onClick={toggleFullscreen}
-                    className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 z-10"
+                    className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 z-10"
                 >
                     {isFullscreen ? (
-                        <Minimize2 className="w-5 h-5" />
+                        <Minimize2 className="w-6 h-6" />
                     ) : (
-                        <Maximize2 className="w-5 h-5" />
+                        <Maximize2 className="w-6 h-6" />
                     )}
                 </button>
-
                 {
                     wait === 1 ? (<div className="text-2xl absolute top-2 left-2 text-black border-2 bg-white border-black p-2">
                         <div className="flex items-center gap-x-2 justify-center">

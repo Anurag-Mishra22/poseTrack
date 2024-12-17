@@ -7,6 +7,7 @@ import { useLeftCurl } from "@/store/useLeftCurl";
 import { SquareCheck } from "lucide-react";
 import Image from "next/image";
 import { initializeTensorFlow } from "@/lib/tfjs-setup";
+import { Maximize2, Minimize2 } from "lucide-react";
 
 type Exercise = {
     heading: string;
@@ -31,10 +32,30 @@ export default function Home() {
     const [wait, setWait] = useState(1);
     const [leftAngle, setLeftAngle] = useState<number>(0);
 
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
     const rafId = useRef<number>();
     const lastFrameTime = useRef<number>(0);
     const targetFPS = 30;
     const frameInterval = 1000 / targetFPS;
+
+
+
+    const toggleFullscreen = () => {
+        if (!containerRef.current) return;
+
+        if (!isFullscreen) {
+            if (containerRef.current.requestFullscreen) {
+                containerRef.current.requestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+        setIsFullscreen(!isFullscreen);
+    };
 
     useEffect(() => {
         const initPoseDetection = async () => {
@@ -129,55 +150,48 @@ export default function Home() {
     const drawKeypointsAndLines = (keypoints: any, ctx: any) => {
         const threshold = 0.7;
         const targetKeypoints = ["left_wrist", "left_elbow", "left_shoulder"];
-        const leftWrist = keypoints.find((kp: any) => kp.name === "left_wrist");
-        const leftElbow = keypoints.find((kp: any) => kp.name === "left_elbow");
-        const leftShoulder = keypoints.find((kp: any) => kp.name === "left_shoulder");
 
-        if (leftWrist?.score > 0.7 && leftElbow?.score > threshold && leftShoulder?.score > threshold) {
-            setWait(0);
+        ctx.save();
 
-            ctx.save();
-            ctx.scale(-1, 1);
-            ctx.translate(-ctx.canvas.width, 0);
+        // Clear previous frame
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-            // Draw keypoints
-            keypoints.forEach((point: any) => {
-                if (targetKeypoints.includes(point.name) && point.score > threshold) {
-                    ctx.beginPath();
-                    ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
-                    ctx.fillStyle = "aqua";
-                    ctx.fill();
-                    ctx.strokeStyle = "white";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-            });
+        // Draw keypoints
+        keypoints.forEach((point: any) => {
+            if (targetKeypoints.includes(point.name) && point.score > threshold) {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = "aqua";
+                ctx.fill();
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        });
 
-            // Draw lines
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = "aqua";
+        // Draw lines
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "aqua";
 
-            const connections = [
-                ["left_shoulder", "left_elbow"],
-                ["left_elbow", "left_wrist"]
-            ];
+        const connections = [
+            ["left_shoulder", "left_elbow"],
+            ["left_elbow", "left_wrist"]
+        ];
 
-            connections.forEach(([startName, endName]) => {
-                const start = keypoints.find((kp: any) => kp.name === startName);
-                const end = keypoints.find((kp: any) => kp.name === endName);
+        connections.forEach(([startName, endName]) => {
+            const start = keypoints.find((kp: any) => kp.name === startName);
+            const end = keypoints.find((kp: any) => kp.name === endName);
 
-                if (start?.score > threshold && end?.score > threshold) {
-                    ctx.beginPath();
-                    ctx.moveTo(start.x, start.y);
-                    ctx.lineTo(end.x, end.y);
-                    ctx.stroke();
-                }
-            });
+            if (start?.score > threshold && end?.score > threshold) {
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.stroke();
+            }
+        });
+        setWait(0)
 
-            ctx.restore();
-        } else {
-            setWait(1);
-        }
+        ctx.restore();
     };
 
     const detectPose = async (timestamp: number) => {
@@ -196,7 +210,7 @@ export default function Home() {
         try {
             const poses = await detector.estimatePoses(videoRef.current, {
                 maxPoses: 1,
-                flipHorizontal: true, // Enable horizontal flip
+                flipHorizontal: true,
                 scoreThreshold: 0.7
             });
 
@@ -228,20 +242,40 @@ export default function Home() {
 
     return (
         <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
-            <div className="webcam-container hidden md:flex relative w-full h-screen md:max-w-[640px] md:h-96 lg:h-[480px] overflow-hidden">
+            <div
+                ref={containerRef}
+                className={`webcam-container relative ${isFullscreen
+                        ? "fixed inset-0 z-50 bg-black w-screen h-screen"
+                        : "w-full h-[calc(100vh-2rem)] md:max-w-[640px] md:h-96 lg:h-[480px]"
+                    } overflow-hidden`}
+            >
                 <video
                     ref={videoRef}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] md:max-w-[640px] transform scale-x-[-1]"
+                    className={`absolute top-0 left-0 w-full h-full ${isFullscreen ? "object-cover md:object-contain" : "object-cover"
+                        } rounded-[12px] transform scale-x-[-1]`}
                     autoPlay
                     muted
                     playsInline
                 />
+
                 <canvas
                     ref={canvasRef}
                     width={640}
                     height={480}
-                    className="absolute top-0 left-0 w-full h-full pointer-events-none md:max-w-[640px]"
+                    className={`absolute top-0 left-0 w-full h-full ${isFullscreen ? "object-cover md:object-contain" : "object-cover"
+                        } pointer-events-none transform scale-x-[-1]`}
                 />
+
+                <button
+                    onClick={toggleFullscreen}
+                    className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 z-10"
+                >
+                    {isFullscreen ? (
+                        <Minimize2 className="w-6 h-6" />
+                    ) : (
+                        <Maximize2 className="w-6 h-6" />
+                    )}
+                </button>
                 {wait === 1 ? (
                     <div className="text-2xl absolute top-2 left-2 text-black border-2 bg-white border-black p-2">
                         <div className="flex items-center gap-x-2 justify-center">
