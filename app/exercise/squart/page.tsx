@@ -478,9 +478,9 @@ export default function Home() {
         <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
             <div
                 ref={containerRef}
-                className={`webcam-container relative ${isFullscreen
-                        ? "fixed inset-0 z-50 bg-black w-screen h-screen"
-                        : "w-full h-[calc(100vh-2rem)] md:max-w-[640px] md:h-96 lg:h-[480px]"
+                className={`webcam-container hidden md:flex relative ${isFullscreen
+                    ? "fixed inset-0 z-50 bg-black w-screen h-screen"
+                    : "w-full h-[calc(100vh-2rem)] md:max-w-[640px] md:h-96 lg:h-[480px]"
                     } overflow-hidden`}
             >
 

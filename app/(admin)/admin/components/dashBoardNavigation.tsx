@@ -5,6 +5,10 @@ import { usePathname } from "next/navigation"
 
 const LINKS = [
     {
+        name: 'Home',
+        href: '/',
+    },
+    {
         name: 'Dashboard',
         href: '/admin',
     },

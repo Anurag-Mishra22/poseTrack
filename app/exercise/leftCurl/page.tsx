@@ -40,6 +40,11 @@ export default function Home() {
     const targetFPS = 30;
     const frameInterval = 1000 / targetFPS;
 
+    const glowOpacityRef = useRef(0.3);
+    const glowAnimationRef = useRef<number>();
+
+
+
 
 
     const toggleFullscreen = () => {
@@ -146,32 +151,73 @@ export default function Home() {
             setWait(1);
         }
     };
+    // Color configuration
+    // Update COLORS object
+    const COLORS = {
+        primary: '#0068FF',
+        secondary: '#ffffff',
+        glow: () => `rgba(0, 255, 255, ${glowOpacityRef.current})`,
+        line: {
+            gradient1: '#00ffff',
+            gradient2: '#0099ff'
+        }
+    };
+
+    const STYLES = {
+        keypoint: {
+            radius: 6,
+            glowSize: 15,
+            lineWidth: 2
+        },
+        connection: {
+            lineWidth: 2
+        }
+    };
+
+    // Add animation setup in useEffect
+    useEffect(() => {
+        // Setup glow animation
+        glowAnimationRef.current = window.setInterval(() => {
+            glowOpacityRef.current = 0.3 + Math.abs(Math.sin(Date.now() / 1000)) * 0.4;
+        }, 16); // ~60fps
+
+        return () => {
+            if (glowAnimationRef.current) {
+                clearInterval(glowAnimationRef.current);
+            }
+        };
+    }, []);
 
     const drawKeypointsAndLines = (keypoints: any, ctx: any) => {
         const threshold = 0.7;
         const targetKeypoints = ["left_wrist", "left_elbow", "left_shoulder"];
 
         ctx.save();
-
-        // Clear previous frame
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-        // Draw keypoints
+        // Draw keypoints with glow effect
         keypoints.forEach((point: any) => {
             if (targetKeypoints.includes(point.name) && point.score > threshold) {
+                // Animated glow effect
                 ctx.beginPath();
-                ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
-                ctx.fillStyle = "aqua";
+                ctx.arc(point.x, point.y, STYLES.keypoint.glowSize, 0, 2 * Math.PI);
+                ctx.fillStyle = COLORS.glow();
                 ctx.fill();
-                ctx.strokeStyle = "white";
-                ctx.lineWidth = 2;
+
+                // Main keypoint
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, STYLES.keypoint.radius, 0, 2 * Math.PI);
+                ctx.fillStyle = COLORS.primary;
+                ctx.fill();
+                ctx.strokeStyle = COLORS.secondary;
+                ctx.lineWidth = STYLES.keypoint.lineWidth;
                 ctx.stroke();
             }
         });
 
         // Draw lines
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "aqua";
+        ctx.lineWidth = STYLES.connection.lineWidth;
+        ctx.lineCap = 'round';
 
         const connections = [
             ["left_shoulder", "left_elbow"],
@@ -184,13 +230,74 @@ export default function Home() {
 
             if (start?.score > threshold && end?.score > threshold) {
                 ctx.beginPath();
+                ctx.strokeStyle = COLORS.primary;
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
                 ctx.stroke();
             }
         });
-        setWait(0)
 
+        // Draw angle arc and text
+        const shoulder = keypoints.find((kp: any) => kp.name === "left_shoulder");
+        const elbow = keypoints.find((kp: any) => kp.name === "left_elbow");
+        const wrist = keypoints.find((kp: any) => kp.name === "left_wrist");
+
+        if (shoulder?.score > threshold && elbow?.score > threshold && wrist?.score > threshold) {
+            // Calculate angle
+            const angle1 = Math.atan2(shoulder.y - elbow.y, shoulder.x - elbow.x);
+            const angle2 = Math.atan2(wrist.y - elbow.y, wrist.x - elbow.x);
+            let angle = Math.abs((angle2 - angle1) * 180 / Math.PI);
+            if (angle > 180) angle = 360 - angle;
+
+            // Draw arc
+            const radius = 30;
+            ctx.beginPath();
+            ctx.arc(elbow.x, elbow.y, radius, angle1, angle2);
+            ctx.strokeStyle = COLORS.primary;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw angle text with background
+            ctx.save();
+            const textRadius = radius + 20;
+            const midAngle = (angle1 + angle2) / 2;
+            const textX = elbow.x + textRadius * Math.cos(midAngle);
+            const textY = elbow.y + textRadius * Math.sin(midAngle);
+
+            ctx.translate(textX, textY);
+            ctx.scale(-1, 1);
+            let rotation = midAngle;
+            if (rotation > Math.PI / 2 || rotation < -Math.PI / 2) {
+                rotation += Math.PI;
+            }
+            ctx.rotate(rotation);
+
+            // Add background rectangle with rounded corners
+            const padding = 8;
+            const borderRadius = 4;
+            ctx.font = "16px Arial";
+            const textMetrics = ctx.measureText(`${Math.round(angle)}°`);
+            ctx.fillStyle = 'white';
+
+            ctx.beginPath();
+            ctx.roundRect(
+                -textMetrics.width / 2 - padding / 2,
+                -10 - padding / 2,
+                textMetrics.width + padding,
+                20 + padding,
+                borderRadius
+            );
+            ctx.fill();
+
+            // Draw text
+            ctx.fillStyle = COLORS.primary;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(`${Math.round(angle)}°`, 0, 0);
+            ctx.restore();
+        }
+
+        setWait(0);
         ctx.restore();
     };
 
@@ -244,9 +351,9 @@ export default function Home() {
         <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
             <div
                 ref={containerRef}
-                className={`webcam-container relative ${isFullscreen
-                        ? "fixed inset-0 z-50 bg-black w-screen h-screen"
-                        : "w-full h-[calc(100vh-2rem)] md:max-w-[640px] md:h-96 lg:h-[480px]"
+                className={`webcam-container hidden md:flex relative ${isFullscreen
+                    ? "fixed inset-0 z-50 bg-black w-screen h-screen"
+                    : "w-full h-[calc(100vh-2rem)] md:max-w-[640px] md:h-96 lg:h-[480px]"
                     } overflow-hidden`}
             >
                 <video
