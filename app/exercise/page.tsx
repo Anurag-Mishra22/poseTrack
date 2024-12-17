@@ -20,11 +20,18 @@ const ExercisePage = () => {
             href: "/exercise/leftCurl",
             img: "/bicepcurl.gif"
         },
+        // {
+        //     heading: "Squats",
+        //     description:
+        //         "Follow step-by-step instructions tailored to your physiotherapy needs.",
+        //     href: "https://huggingface.co/spaces/Pratyush101/streamlit-webrtc-example",
+        //     img: "/squatgif.gif"
+        // },
         {
             heading: "Squats",
             description:
                 "Follow step-by-step instructions tailored to your physiotherapy needs.",
-            href: "https://huggingface.co/spaces/Pratyush101/streamlit-webrtc-example",
+            href: "/exercise/squart",
             img: "/squatgif.gif"
         },
         {
