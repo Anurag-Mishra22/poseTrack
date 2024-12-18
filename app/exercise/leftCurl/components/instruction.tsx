@@ -222,10 +222,7 @@ const Instructions = () => {
                                 Now you"ll see how to do a perfect bicep curl.
                                 {currentMusic && <span> Currently playing: {currentMusic}</span>}
                             </p>
-                            <p className="text-lg">
-                                Now you&apos;ll see how to do a perfect bicep curl.
-                                {currentMusic && <span> Currently playing: {currentMusic}</span>}
-                            </p>
+
                             <div className="relative h-78">
                                 <Image
                                     src="/bicepcurldemo.gif"
