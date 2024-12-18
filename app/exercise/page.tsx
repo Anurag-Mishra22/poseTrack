@@ -38,7 +38,7 @@ const ExercisePage = () => {
             heading: "Virtual Keyboard",
             description:
                 "Follow step-by-step instructions tailored to your physiotherapy needs.",
-            href: "https://huggingface.co/spaces/Pratyush101/streamlit-webrtc-example-experimental",
+            href: "https://virtual-keyboard-app.onrender.com/",
             img: "/virtualkeyboard.gif"
         },
         // {
