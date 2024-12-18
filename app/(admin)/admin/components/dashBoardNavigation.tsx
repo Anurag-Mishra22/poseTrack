@@ -16,6 +16,10 @@ const LINKS = [
         name: 'Users',
         href: '/admin/dashboard/users',
     },
+    {
+        name: 'Skeletons',
+        href: '/admin/dashboard/skeletons',
+    },
 
 ]
 
