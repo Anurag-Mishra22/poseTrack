@@ -8,6 +8,8 @@ import { SquareCheck } from "lucide-react";
 import Image from "next/image";
 import { initializeTensorFlow } from "@/lib/tfjs-setup";
 import { Maximize2, Minimize2 } from "lucide-react";
+import Instructions from "./components/instruction";
+// import Instructions from "./components/instruction";
 
 type Exercise = {
     heading: string;
@@ -15,25 +17,25 @@ type Exercise = {
 };
 
 // At top of file, update loadAudio function
-const loadAudio = (url: string) => {
-    const audio = new Audio();
-    audio.preload = 'auto';
+// const loadAudio = (url: string) => {
+//     const audio = new Audio();
+//     audio.preload = 'auto';
 
-    return new Promise<HTMLAudioElement>((resolve, reject) => {
-        audio.addEventListener('canplaythrough', () => {
-            // console.log(`Audio loaded successfully: ${url}`);
-            resolve(audio);
-        });
+//     return new Promise<HTMLAudioElement>((resolve, reject) => {
+//         audio.addEventListener('canplaythrough', () => {
+//             // console.log(`Audio loaded successfully: ${url}`);
+//             resolve(audio);
+//         });
 
-        audio.addEventListener('error', (e) => {
-            console.error(`Audio load error for ${url}:`, e);
-            reject(new Error(`Failed to load audio file ${url}: ${e.message}`));
-        });
+//         audio.addEventListener('error', (e) => {
+//             console.error(`Audio load error for ${url}:`, e);
+//             reject(new Error(`Failed to load audio file ${url}: ${e.message}`));
+//         });
 
-        // console.log(`Attempting to load audio from: ${url}`);
-        audio.src = url;
-    });
-};
+//         // console.log(`Attempting to load audio from: ${url}`);
+//         audio.src = url;
+//     });
+// };
 
 
 export default function Home() {
@@ -59,7 +61,7 @@ export default function Home() {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     // Add new state for audio permission
-    const [audioEnabled, setAudioEnabled] = useState(false);
+    // const [audioEnabled, setAudioEnabled] = useState(false);
 
     const rafId = useRef<number>();
     const lastFrameTime = useRef<number>(0);
@@ -70,95 +72,108 @@ export default function Home() {
     const glowAnimationRef = useRef<number>();
 
     const hasInteractedRef = useRef(false);
-    const [upSound, setUpSound] = useState<HTMLAudioElement | null>(null);
-    const [downSound, setDownSound] = useState<HTMLAudioElement | null>(null);
+    // const [upSound, setUpSound] = useState<HTMLAudioElement | null>(null);
+    // const [downSound, setDownSound] = useState<HTMLAudioElement | null>(null);
+
+
+    // const speakNumber = (number: number) => {
+    //     const utterance = new SpeechSynthesisUtterance(number.toString());
+    //     speechSynthesis.speak(utterance);
+    // };
+
+    // useEffect(() => {
+    //     // Speak the count whenever it changes
+    //     if (curlCount > 0) {
+    //         speakNumber(curlCount);
+    //     }
+    // }, [curlCount]); // Trigger when count changes
 
 
     // Add click handler to enable audio
-    useEffect(() => {
-        const enableAudio = () => {
-            hasInteractedRef.current = true;
-        };
+    // useEffect(() => {
+    //     const enableAudio = () => {
+    //         hasInteractedRef.current = true;
+    //     };
 
-        document.addEventListener('click', enableAudio);
-        return () => document.removeEventListener('click', enableAudio);
-    }, []);
+    //     document.addEventListener('click', enableAudio);
+    //     return () => document.removeEventListener('click', enableAudio);
+    // }, []);
 
-    // Load audio files when component mounts
-    useEffect(() => {
-        const loadSounds = async () => {
-            try {
-                // console.log('Starting to load audio files...');
-                const upPath = '/up.m4a';
-                const downPath = '/down.m4a';
+    // // Load audio files when component mounts
+    // useEffect(() => {
+    //     const loadSounds = async () => {
+    //         try {
+    //             // console.log('Starting to load audio files...');
+    //             const upPath = '/up.m4a';
+    //             const downPath = '/down.m4a';
 
-                // console.log(`Loading from paths: ${upPath}, ${downPath}`);
+    //             // console.log(`Loading from paths: ${upPath}, ${downPath}`);
 
-                const [up, down] = await Promise.all([
-                    loadAudio(upPath),
-                    loadAudio(downPath)
-                ]);
+    //             const [up, down] = await Promise.all([
+    //                 loadAudio(upPath),
+    //                 loadAudio(downPath)
+    //             ]);
 
-                // console.log('Audio files loaded successfully');
-                setUpSound(up);
-                setDownSound(down);
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                console.error("Failed to load audio files:", errorMessage);
-            }
-        };
-        loadSounds();
-    }, []);
+    //             // console.log('Audio files loaded successfully');
+    //             setUpSound(up);
+    //             setDownSound(down);
+    //         } catch (error) {
+    //             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    //             console.error("Failed to load audio files:", errorMessage);
+    //         }
+    //     };
+    //     loadSounds();
+    // }, []);
 
     // Update sound effect logic
-    useEffect(() => {
-        const playSound = async (audio: HTMLAudioElement) => {
-            try {
-                if (!hasInteractedRef.current) return; // Only play if user has interacted
-                audio.currentTime = 0;
-                await audio.play();
-            } catch (error) {
-                if (error instanceof Error) {
-                    // console.log("Audio play error:", error.message);
-                }
-            }
-        };
+    // useEffect(() => {
+    //     const playSound = async (audio: HTMLAudioElement) => {
+    //         try {
+    //             if (!hasInteractedRef.current) return; // Only play if user has interacted
+    //             audio.currentTime = 0;
+    //             await audio.play();
+    //         } catch (error) {
+    //             if (error instanceof Error) {
+    //                 // console.log("Audio play error:", error.message);
+    //             }
+    //         }
+    //     };
 
-        if (stageL === 'up') {
-            if (upSound) playSound(upSound);
-        } else if (stageL === 'down') {
-            if (downSound) playSound(downSound);
-        }
-    }, [stageL]);
+    //     if (stageL === 'up') {
+    //         if (upSound) playSound(upSound);
+    //     } else if (stageL === 'down') {
+    //         if (downSound) playSound(downSound);
+    //     }
+    // }, [stageL]);
 
     // Keep cleanup effect
-    useEffect(() => {
-        return () => {
-            if (upSound) {
-                upSound.pause();
-                upSound.currentTime = 0;
-            }
-            if (downSound) {
-                downSound.pause();
-                downSound.currentTime = 0;
-            }
-        };
-    }, []);
+    // useEffect(() => {
+    //     return () => {
+    //         if (upSound) {
+    //             upSound.pause();
+    //             upSound.currentTime = 0;
+    //         }
+    //         if (downSound) {
+    //             downSound.pause();
+    //             downSound.currentTime = 0;
+    //         }
+    //     };
+    // }, []);
 
-    const requestAudioPermission = async () => {
-        try {
-            if (!upSound || !downSound) {
-                throw new Error("Audio files not loaded");
-            }
-            await upSound.play();
-            await upSound.pause();
-            upSound.currentTime = 0;
-            setAudioEnabled(true);
-            hasInteractedRef.current = true;
-        } catch (error) {
-            console.error("Failed to enable audio:", error);
-        }
-    };
+    // const requestAudioPermission = async () => {
+    //     try {
+    //         if (!upSound || !downSound) {
+    //             throw new Error("Audio files not loaded");
+    //         }
+    //         await upSound.play();
+    //         await upSound.pause();
+    //         upSound.currentTime = 0;
+    //         setAudioEnabled(true);
+    //         hasInteractedRef.current = true;
+    //     } catch (error) {
+    //         console.error("Failed to enable audio:", error);
+    //     }
+    // };
 
 
     const toggleFullscreen = () => {
@@ -463,14 +478,14 @@ export default function Home() {
 
     return (
         <div className="flex flex-col md:flex-row gap-y-6 md:gap-x-4 mt-4 ml-4 p-4 max-w-7xl">
-            {!audioEnabled && (
+            {/* {!audioEnabled && (
                 <button
                     onClick={requestAudioPermission}
                     className="fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-md z-50"
                 >
                     Enable Sound
                 </button>
-            )}
+            )} */}
             <div
                 ref={containerRef}
                 className={`webcam-container hidden md:flex relative ${isFullscreen
@@ -505,6 +520,7 @@ export default function Home() {
                         <Maximize2 className="w-6 h-6" />
                     )}
                 </button>
+                <Instructions />
                 {wait === 1 ? (
                     <div className="text-2xl absolute top-2 left-2 text-black border-2 bg-white border-black p-2">
                         <div className="flex items-center gap-x-2 justify-center">
@@ -578,28 +594,7 @@ export default function Home() {
                     ))}
                 </div>
 
-                <div className="flex flex-col gap-4 p-2">
-                    <div className="text-3xl md:text-4xl lg:text-5xl font-bold">
-                        <span className="text-[#02a8c0]">How to Perform the Exercise</span>
-                    </div>
-                    <p className="text-lg">
-                        Ensure that your arm stays aligned with the body and that you move the weight only through your elbow joint for proper form.
-                        Keep your movements slow and controlled, and avoid swinging the weight for maximum effectiveness.
-                    </p>
 
-                    <div className="flex gap-2">
-                        <SquareCheck size={30} className="text-green-500" />
-                        <p>Keep the elbow close to your body</p>
-                    </div>
-                    <div className="flex gap-2">
-                        <SquareCheck size={30} className="text-green-500" />
-                        <p>Control the descent to maximize muscle engagement</p>
-                    </div>
-                    <div className="flex gap-2">
-                        <SquareCheck size={30} className="text-green-500" />
-                        <p>Do not allow the wrist to rotate during the curl</p>
-                    </div>
-                </div>
             </div>
         </div>
     );

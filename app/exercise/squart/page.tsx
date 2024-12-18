@@ -61,6 +61,22 @@ export default function Home() {
 
 
 
+    const speakNumber = (number: number) => {
+        const utterance = new SpeechSynthesisUtterance(number.toString());
+        speechSynthesis.speak(utterance);
+    };
+
+
+    useEffect(() => {
+        // Speak the count whenever it changes
+        if (squatCount > 0) {
+            speakNumber(squatCount);
+        }
+    }, [squatCount]); // Trigger when count changes
+
+
+
+
     const toggleFullscreen = () => {
         if (!containerRef.current) return;
 
