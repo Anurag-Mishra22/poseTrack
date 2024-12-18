@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import {
     Dialog,
     DialogContent,
@@ -25,6 +25,7 @@ const Instructions = () => {
     const [isAudioLoaded, setIsAudioLoaded] = useState(false)
     const [micPermissionGranted, setMicPermissionGranted] = useState(false)
     const [permissionError, setPermissionError] = useState("")
+    const [hasSeenInstructions, setHasSeenInstructions] = useState(false)
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const recognitionRef = useRef<any>(null)
     const musicRef = useRef<HTMLAudioElement | null>(null)
@@ -35,7 +36,7 @@ const Instructions = () => {
         'music3': '/music3.mp3'
     }
 
-    const requestMicrophonePermission = async () => {
+    const requestMicrophonePermission = useCallback(async () => {
         try {
             await navigator.mediaDevices.getUserMedia({ audio: true })
             setMicPermissionGranted(true)
@@ -46,9 +47,50 @@ const Instructions = () => {
             setPermissionError("Microphone access denied. Please enable it in your browser settings.")
             return false
         }
-    }
+    }, [])
 
-    const initializeSpeechRecognition = async () => {
+    const stopMusic = useCallback(() => {
+        if (musicRef.current) {
+            try {
+                musicRef.current.pause()
+                musicRef.current.currentTime = 0
+                setIsPlaying(false)
+                setCurrentMusic("")
+            } catch (error) {
+                console.error('Error stopping music:', error)
+            }
+        }
+    }, [])
+
+    const playMusic = useCallback(async (musicName: string) => {
+        if (!musicFiles[musicName]) {
+            console.error('Music file not found:', musicName)
+            return
+        }
+
+        if (musicRef.current && !isPlaying) {
+            try {
+                musicRef.current.src = musicFiles[musicName]
+                const playPromise = musicRef.current.play()
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            setIsPlaying(true)
+                            setCurrentMusic(musicName)
+                        })
+                        .catch(error => {
+                            console.error('Error playing music:', error)
+                            setIsPlaying(false)
+                        })
+                }
+            } catch (error) {
+                console.error('Error initiating music playback:', error)
+                setIsPlaying(false)
+            }
+        }
+    }, [isPlaying, musicFiles])
+
+    const initializeSpeechRecognition = useCallback(async () => {
         const hasPermission = await requestMicrophonePermission()
         if (!hasPermission) return
 
@@ -60,10 +102,7 @@ const Instructions = () => {
 
             recognitionRef.current.onresult = (event: any) => {
                 const command = event.results[event.results.length - 1][0].transcript.toLowerCase()
-                console.log('Recognized command:', command)
-
                 if (command.includes('stop') || command.includes('pause')) {
-                    console.log('Stop command detected, isPlaying:', isPlaying)
                     stopMusic()
                 } else if (command.includes('hey play')) {
                     const musicName = command.replace('hey play', '').trim()
@@ -78,13 +117,11 @@ const Instructions = () => {
 
             recognitionRef.current.onend = () => {
                 if (micPermissionGranted) {
-                    console.log('Speech recognition ended, restarting...')
                     recognitionRef.current?.start()
                 }
             }
 
             recognitionRef.current.onerror = (event: any) => {
-                console.error('Speech recognition error:', event.error)
                 if (event.error === 'not-allowed') {
                     setMicPermissionGranted(false)
                     setPermissionError("Microphone access denied. Please enable it in your browser settings.")
@@ -99,9 +136,9 @@ const Instructions = () => {
                 console.error('Failed to start speech recognition:', error)
             }
         }
-    }
+    }, [micPermissionGranted, musicFiles, playMusic, requestMicrophonePermission, stopMusic])
 
-    const playInstructionAudio = async () => {
+    const playInstructionAudio = useCallback(async () => {
         if (audioRef.current && !isInstructionPlaying) {
             try {
                 setIsInstructionPlaying(true)
@@ -111,71 +148,36 @@ const Instructions = () => {
                 setIsInstructionPlaying(false)
             }
         }
-    }
+    }, [isInstructionPlaying])
 
-    const stopInstructionAudio = () => {
+    const stopInstructionAudio = useCallback(() => {
         if (audioRef.current) {
             audioRef.current.pause()
             audioRef.current.currentTime = 0
             setIsInstructionPlaying(false)
         }
-    }
-
-    const playMusic = async (musicName: string) => {
-        if (!musicFiles[musicName]) {
-            console.error('Music file not found:', musicName)
-            return
-        }
-
-        if (musicRef.current && !isPlaying) {
-            try {
-                musicRef.current.src = musicFiles[musicName]
-                const playPromise = musicRef.current.play()
-                if (playPromise !== undefined) {
-                    playPromise
-                        .then(() => {
-                            console.log(`${musicName} started playing`)
-                            setIsPlaying(true)
-                            setCurrentMusic(musicName)
-                        })
-                        .catch(error => {
-                            console.error('Error playing music:', error)
-                            setIsPlaying(false)
-                        })
-                }
-            } catch (error) {
-                console.error('Error initiating music playback:', error)
-                setIsPlaying(false)
-            }
-        }
-    }
-
-    const stopMusic = () => {
-        if (musicRef.current) {
-            try {
-                musicRef.current.pause()
-                musicRef.current.currentTime = 0
-                setIsPlaying(false)
-                setCurrentMusic("")
-            } catch (error) {
-                console.error('Error stopping music:', error)
-            }
-        }
-    }
+    }, [])
 
     useEffect(() => {
+        const hasVisited = localStorage.getItem('hasSeenInstructions')
+        setHasSeenInstructions(!!hasVisited)
+
         audioRef.current = new Audio('/bicepInstruction.m4a')
         musicRef.current = new Audio()
 
         const handleAudioLoaded = () => {
             setIsAudioLoaded(true)
-            setOpen(true)
-            playInstructionAudio()
+            if (!hasVisited) {
+                setOpen(true)
+                playInstructionAudio()
+            }
         }
 
         const handleInstructionEnded = () => {
             setIsInstructionPlaying(false)
             setOpen(false)
+            localStorage.setItem('hasSeenInstructions', 'true')
+            setHasSeenInstructions(true)
         }
 
         const handleMusicEnded = () => {
@@ -210,14 +212,14 @@ const Instructions = () => {
             stopInstructionAudio()
             stopMusic()
         }
-    }, [])
+    }, [initializeSpeechRecognition, playInstructionAudio, stopInstructionAudio, stopMusic])
 
-    const handleOpenChange = (newOpen: boolean) => {
+    const handleOpenChange = useCallback((newOpen: boolean) => {
         setOpen(newOpen)
         if (!newOpen) {
             stopInstructionAudio()
         }
-    }
+    }, [stopInstructionAudio])
 
     if (!isAudioLoaded) {
         return (
@@ -228,7 +230,7 @@ const Instructions = () => {
     }
 
     return (
-        <Dialog open={open && isAudioLoaded} onOpenChange={handleOpenChange}>
+        <Dialog open={!hasSeenInstructions && open && isAudioLoaded} onOpenChange={handleOpenChange}>
             <DialogContent>
                 <DialogTitle>
                     <div className="text-3xl items-center md:text-3xl lg:text-3xl font-bold">
@@ -239,19 +241,19 @@ const Instructions = () => {
                     <div className="flex flex-col gap-4 p-2">
                         <div className="flex flex-col gap-4 p-2">
                             <p className="text-lg">
-                                Now you'll see how to do a perfect bicep curl.
+                                Now you&apos;ll see how to do a perfect bicep curl.
                                 {currentMusic && <span> Currently playing: {currentMusic}</span>}
                             </p>
                             {permissionError && (
                                 <p className="text-red-500">{permissionError}</p>
                             )}
-                            <div className='relative h-78'>
+                            <div className="relative h-78">
                                 <Image
                                     src="/bicepcurldemo.gif"
-                                    alt='exercise'
+                                    alt="exercise"
                                     width={300}
                                     height={200}
-                                    className='flex object-cover w-full'
+                                    className="flex object-cover w-full"
                                 />
                             </div>
                         </div>
