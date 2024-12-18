@@ -219,7 +219,7 @@ const Instructions = () => {
                     <div className="flex flex-col gap-4 p-2">
                         <div className="flex flex-col gap-4 p-2">
                             <p className="text-lg">
-                                Now you"ll see how to do a perfect bicep curl.
+                                Now you'll see how to do a perfect bicep curl.
                                 {currentMusic && <span> Currently playing: {currentMusic}</span>}
                             </p>
 
