@@ -520,7 +520,7 @@ export default function Home() {
                         <Maximize2 className="w-6 h-6" />
                     )}
                 </button>
-                <Instructions />
+                <Instructions autoOpen={true} />
                 {wait === 1 ? (
                     <div className="text-2xl absolute top-2 left-2 text-black border-2 bg-white border-black p-2">
                         <div className="flex items-center gap-x-2 justify-center">
