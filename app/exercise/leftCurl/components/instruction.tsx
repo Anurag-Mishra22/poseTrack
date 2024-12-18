@@ -229,7 +229,7 @@ const Instructions = () => {
                             <div className='relative h-78'>
                                 <Image
                                     src="/bicepcurldemo.gif"
-                                    alt='exercise'
+                                    alt="exercise"
                                     width={300}
                                     height={200}
                                     className='flex object-cover w-full'
