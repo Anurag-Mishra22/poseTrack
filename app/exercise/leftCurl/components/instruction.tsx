@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import {
     Dialog,
     DialogContent,
@@ -33,7 +33,7 @@ const Instructions = () => {
         'music3': '/music3.mp3'
     }
 
-    const playInstructionAudio = async () => {
+    const playInstructionAudio = useCallback(async () => {
         if (audioRef.current && !isInstructionPlaying) {
             try {
                 setIsInstructionPlaying(true)
@@ -43,7 +43,7 @@ const Instructions = () => {
                 setIsInstructionPlaying(false)
             }
         }
-    }
+    }, [isInstructionPlaying])
 
     const stopInstructionAudio = () => {
         if (audioRef.current) {
@@ -53,7 +53,7 @@ const Instructions = () => {
         }
     }
 
-    const playMusic = async (musicName: string) => {
+    const playMusic = useCallback(async (musicName: string) => {
         if (!musicFiles[musicName]) {
             console.error('Music file not found:', musicName)
             return
@@ -80,7 +80,7 @@ const Instructions = () => {
                 setIsPlaying(false)
             }
         }
-    }
+    }, [isPlaying, musicFiles, playInstructionAudio])
 
     const stopMusic = () => {
         console.log('Attempting to stop music...');
@@ -220,6 +220,10 @@ const Instructions = () => {
                         <div className="flex flex-col gap-4 p-2">
                             <p className="text-lg">
                                 Now you'll see how to do a perfect bicep curl.
+                                {currentMusic && <span> Currently playing: {currentMusic}</span>}
+                            </p>
+                            <p className="text-lg">
+                                Now you&apos;ll see how to do a perfect bicep curl.
                                 {currentMusic && <span> Currently playing: {currentMusic}</span>}
                             </p>
                             <div className='relative h-78'>
