@@ -28,9 +28,9 @@ const Instructions = () => {
     const musicRef = useRef<HTMLAudioElement | null>(null)
 
     const musicFiles: { [key: string]: string } = {
-        'music': '/music.mp3',
-        'music2': '/music2.mp3',
-        'music3': '/music3.mp3'
+        "music": '/music.mp3',
+        "music2": "/music2.mp3",
+        "music3": "/music3.mp3"
     }
 
     const playInstructionAudio = useCallback(async () => {
@@ -39,7 +39,7 @@ const Instructions = () => {
                 setIsInstructionPlaying(true)
                 await audioRef.current.play()
             } catch (error) {
-                console.error('Error playing instruction audio:', error)
+                console.error("Error playing instruction audio:", error)
                 setIsInstructionPlaying(false)
             }
         }
@@ -55,7 +55,7 @@ const Instructions = () => {
 
     const playMusic = useCallback(async (musicName: string) => {
         if (!musicFiles[musicName]) {
-            console.error('Music file not found:', musicName)
+            console.error("Music file not found:", musicName)
             return
         }
 
@@ -71,38 +71,38 @@ const Instructions = () => {
                             setCurrentMusic(musicName)
                         })
                         .catch(error => {
-                            console.error('Error playing music:', error)
+                            console.error("Error playing music:", error)
                             setIsPlaying(false)
                         })
                 }
             } catch (error) {
-                console.error('Error initiating music playback:', error)
+                console.error("Error initiating music playback:", error)
                 setIsPlaying(false)
             }
         }
     }, [isPlaying, musicFiles, playInstructionAudio])
 
     const stopMusic = () => {
-        console.log('Attempting to stop music...');
+        console.log("Attempting to stop music...");
         if (musicRef.current) {
             try {
-                console.log('Music ref exists, stopping...');
+                console.log("Music ref exists, stopping...");
                 musicRef.current.pause();
                 musicRef.current.currentTime = 0;
                 setIsPlaying(false);
                 setCurrentMusic("");
-                console.log('Music stopped successfully');
+                console.log("Music stopped successfully");
             } catch (error) {
-                console.error('Error stopping music:', error);
+                console.error("Error stopping music:", error);
             }
         } else {
-            console.log('Music ref is null');
+            console.log("Music ref is null");
         }
     }
 
     useEffect(() => {
         // Initialize audio elements
-        audioRef.current = new Audio('/bicepInstruction.m4a')
+        audioRef.current = new Audio("/bicepInstruction.m4a")
         musicRef.current = new Audio()
 
         // Handle audio loading
@@ -113,7 +113,7 @@ const Instructions = () => {
         }
 
         if (audioRef.current) {
-            audioRef.current.addEventListener('loadeddata', handleAudioLoaded)
+            audioRef.current.addEventListener("loadeddata", handleAudioLoaded)
         }
 
         // Create event handler functions
@@ -129,11 +129,11 @@ const Instructions = () => {
 
         // Add event listeners
         if (audioRef.current) {
-            audioRef.current.addEventListener('ended', handleInstructionEnded)
+            audioRef.current.addEventListener("ended", handleInstructionEnded)
         }
 
         if (musicRef.current) {
-            musicRef.current.addEventListener('ended', handleMusicEnded)
+            musicRef.current.addEventListener("ended", handleMusicEnded)
         }
 
         // Setup speech recognition
@@ -145,13 +145,13 @@ const Instructions = () => {
 
             recognitionRef.current.onresult = (event: any) => {
                 const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-                console.log('Recognized command:', command);
+                console.log("Recognized command:", command);
 
-                if (command.includes('stop') || command.includes('pause')) {
-                    console.log('Stop command detected, isPlaying:', isPlaying);
+                if (command.includes("stop") || command.includes("pause")) {
+                    console.log("Stop command detected, isPlaying:", isPlaying);
                     stopMusic();
-                } else if (command.includes('hey play')) {
-                    const musicName = command.replace('hey play', '').trim();
+                } else if (command.includes("hey play")) {
+                    const musicName = command.replace("hey play", "").trim();
                     if (musicName && musicFiles[musicName]) {
                         if (isPlaying) {
                             stopMusic();
@@ -162,12 +162,12 @@ const Instructions = () => {
             }
 
             recognitionRef.current.onend = () => {
-                console.log('Speech recognition ended, restarting...')
+                console.log("Speech recognition ended, restarting...")
                 recognitionRef.current.start()
             }
 
             recognitionRef.current.onerror = (event: any) => {
-                console.error('Speech recognition error:', event.error)
+                console.error("Speech recognition error:", event.error)
                 recognitionRef.current.start()
             }
 
@@ -176,12 +176,12 @@ const Instructions = () => {
 
         return () => {
             if (audioRef.current) {
-                audioRef.current.removeEventListener('loadeddata', handleAudioLoaded)
-                audioRef.current.removeEventListener('ended', handleInstructionEnded)
+                audioRef.current.removeEventListener("loadeddata", handleAudioLoaded)
+                audioRef.current.removeEventListener("ended", handleInstructionEnded)
                 audioRef.current.pause()
             }
             if (musicRef.current) {
-                musicRef.current.removeEventListener('ended', handleMusicEnded)
+                musicRef.current.removeEventListener("ended", handleMusicEnded)
                 musicRef.current.pause()
             }
             if (recognitionRef.current) {
@@ -219,20 +219,20 @@ const Instructions = () => {
                     <div className="flex flex-col gap-4 p-2">
                         <div className="flex flex-col gap-4 p-2">
                             <p className="text-lg">
-                                Now you'll see how to do a perfect bicep curl.
+                                Now you"ll see how to do a perfect bicep curl.
                                 {currentMusic && <span> Currently playing: {currentMusic}</span>}
                             </p>
                             <p className="text-lg">
                                 Now you&apos;ll see how to do a perfect bicep curl.
                                 {currentMusic && <span> Currently playing: {currentMusic}</span>}
                             </p>
-                            <div className='relative h-78'>
+                            <div className="relative h-78">
                                 <Image
                                     src="/bicepcurldemo.gif"
                                     alt="exercise"
                                     width={300}
                                     height={200}
-                                    className='flex object-cover w-full'
+                                    className="flex object-cover w-full"
                                 />
                             </div>
                         </div>
