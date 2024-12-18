@@ -29,8 +29,9 @@ const Instructions = () => {
 
     const musicFiles: { [key: string]: string } = {
         "music": '/music.mp3',
-        "music2": "/music2.mp3",
-        "music3": "/music3.mp3"
+        "believer": "/believer.m4a",
+        "music3": "/music3.mp3",
+        "sample": "/sample.m4a"
     }
 
     const playInstructionAudio = useCallback(async () => {
@@ -54,33 +55,31 @@ const Instructions = () => {
     }
 
     const playMusic = useCallback(async (musicName: string) => {
-        if (!musicFiles[musicName]) {
-            console.error("Music file not found:", musicName)
-            return
-        }
+        // If music not found, use sample.mp4 as fallback
+        const musicToPlay = musicFiles[musicName] || musicFiles["sample"];
 
         if (musicRef.current && !isPlaying) {
             try {
-                musicRef.current.src = musicFiles[musicName]
-                const playPromise = musicRef.current.play()
+                musicRef.current.src = musicToPlay;
+                const playPromise = musicRef.current.play();
                 if (playPromise !== undefined) {
                     playPromise
                         .then(() => {
-                            console.log(`${musicName} started playing`)
-                            setIsPlaying(true)
-                            setCurrentMusic(musicName)
+                            console.log(`${musicName || 'sample'} started playing`);
+                            setIsPlaying(true);
+                            setCurrentMusic(musicName || 'sample');
                         })
                         .catch(error => {
-                            console.error("Error playing music:", error)
-                            setIsPlaying(false)
-                        })
+                            console.error("Error playing music:", error);
+                            setIsPlaying(false);
+                        });
                 }
             } catch (error) {
-                console.error("Error initiating music playback:", error)
-                setIsPlaying(false)
+                console.error("Error initiating music playback:", error);
+                setIsPlaying(false);
             }
         }
-    }, [isPlaying, musicFiles, playInstructionAudio])
+    }, [isPlaying, musicFiles, playInstructionAudio]);
 
     const stopMusic = () => {
         console.log("Attempting to stop music...");
@@ -152,12 +151,11 @@ const Instructions = () => {
                     stopMusic();
                 } else if (command.includes("hey play")) {
                     const musicName = command.replace("hey play", "").trim();
-                    if (musicName && musicFiles[musicName]) {
-                        if (isPlaying) {
-                            stopMusic();
-                        }
-                        playMusic(musicName);
+                    // Remove the musicFiles check to allow any song name
+                    if (isPlaying) {
+                        stopMusic();
                     }
+                    playMusic(musicName); // playMusic function already handles fallback to sample
                 }
             }
 
